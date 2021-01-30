@@ -1,0 +1,88 @@
+name: Compile
+on:
+  pull_request:
+    branches: [master]
+env:
+  CMAKE_FLAGS: -DCLOVE_ENABLE_ASSERTIONS=ON -DCLOVE_ENABLE_DEBUG_DEFINITION=ON -DCLOVE_ENABLE_PROFILING=ON -DCLOVE_LOG_LEVEL=2 -DCLOVE_USE_SAFE_CAST=ON -DGAR_BUILD_TESTS=OFF
+  BUILD_TYPE: Debug
+jobs:
+  #Windows
+  compile-windows-msvc:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Setup environment
+      run: |
+        mkdir build
+        choco install -y conan
+        curl.exe -o vksdk.exe https://sdk.lunarg.com/sdk/download/1.2.154.1/windows/VulkanSDK-1.2.154.1-Installer.exe?Human=true
+        .\vksdk.exe /S /D=C:\VulkanSDK | Out-Null
+    - name: Configure CMake
+      working-directory: ${{ github.workspace }}/build
+      run: |
+        $env:VULKAN_SDK = 'C:\VulkanSDK'
+        $env:Path += ';C:\VulkanSDK\Bin;C:\Program Files\Conan\conan'
+        #There seems to be an issue when using the env var of CMAKE_FLAGS on windows. When it has multiple options they're all treated as one
+        cmake -DCLOVE_ENABLE_ASSERTIONS=ON -DCLOVE_ENABLE_DEBUG_DEFINITION=ON -DCLOVE_ENABLE_PROFILING=ON -DCLOVE_LOG_LEVEL=2 -DCLOVE_USE_SAFE_CAST=ON -DGAR_BUILD_TESTS=OFF -G "Visual Studio 16 2019" ..
+    - name: Build
+      working-directory: ${{ github.workspace }}/build
+      run: cmake --build . --target ALL_BUILD --config $env:BUILD_TYPE
+  #macOS
+  compile-macos-apple_clang:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup environment
+        run: |
+          mkdir build
+          brew update
+          brew install conan
+      - name: Configure CMake
+        working-directory: ${{ github.workspace }}/build
+        run: cmake $CMAKE_FLAGS -G "Xcode" ..
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: cmake --build . --target ALL_BUILD --config $BUILD_TYPE
+  #Linux
+  compile-linux-gcc:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.pkg.github.com/agarlicmonkey/garlic/linux_build:0.4.0
+      credentials:
+        username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+        password: ${{ secrets.DOCKER_LOGIN_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup environment
+        run: mkdir build
+      - name: Configure CMake
+        working-directory: ${{ github.workspace }}/build
+        run: cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10 -G "Unix Makefiles" ..
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: cmake --build .
+  compile-linux-clang:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.pkg.github.com/agarlicmonkey/garlic/linux_build:0.4.0
+      credentials:
+        username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+        password: ${{ secrets.DOCKER_LOGIN_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup environment
+        run: mkdir build
+      - name: Configure CMake
+        working-directory: ${{ github.workspace }}/build
+        run: cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_COMPILER=clang++-10 -G "Unix Makefiles" ..
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: cmake --build .       

@@ -3,7 +3,7 @@
 #include "Clove/Rendering/Renderables/AnimatedModel.hpp"
 #include "Clove/Rendering/Renderables/StaticModel.hpp"
 
-#include <string_view>
+#include <filesystem>
 
 namespace garlic::clove {
     class GhaFactory;
@@ -16,7 +16,7 @@ namespace garlic::clove::ModelLoader {
      * @param graphicsFactory A pointer to a GhaFactory. Required to create the internal buffers of the model
      * @returns A StaticModel.
      */
-    StaticModel loadStaticModel(std::string_view modelFilePath);
+    StaticModel loadStaticModel(std::filesystem::path const &modelFilePath);
     /**
      * @brief Loads an AnimatedModel from a given file path.
      * @details An AnimatedModel contains a Skeleton and Animator to generate it's position for a given frame.
@@ -24,5 +24,5 @@ namespace garlic::clove::ModelLoader {
      * @param graphicsFactory A pointer to a GhaFactory. Required to create the internal buffers of the model
      * @returns An AnimatedModel.
      */
-    AnimatedModel loadAnimatedModel(std::string_view modelFilePath);
+    AnimatedModel loadAnimatedModel(std::filesystem::path const &modelFilePath);
 }

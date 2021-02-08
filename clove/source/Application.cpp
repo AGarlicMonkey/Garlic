@@ -128,7 +128,7 @@ namespace garlic::clove {
         surface.reset();
     }
 
-    Application::Application(std::unique_ptr<GhaDevice> graphicsDevice, std::unique_ptr<AudioDevice> audioDevice, std::unique_ptr<Surface> surface, std::unique_ptr<RenderTarget> renderTarget)
+    Application::Application(std::unique_ptr<GhaDevice> graphicsDevice, std::unique_ptr<AhaDevice> audioDevice, std::unique_ptr<Surface> surface, std::unique_ptr<RenderTarget> renderTarget)
 		: graphicsDevice{ std::move(graphicsDevice) }
 		, audioDevice{ std::move(audioDevice) }
 		, surface{ std::move(surface) }{

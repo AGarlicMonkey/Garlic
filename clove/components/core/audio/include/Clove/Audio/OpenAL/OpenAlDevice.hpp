@@ -12,7 +12,7 @@ namespace garlic::clove {
     /**
      * @brief Represents the actual hardware used for audio rendering. Can be quieried for info about the device.
      */
-    class OpenAlDevice : public AudioDevice {
+    class OpenAlDevice : public AhaDevice {
         //VARIABLES
     private:
         ALCdevice *alDevice{ nullptr };

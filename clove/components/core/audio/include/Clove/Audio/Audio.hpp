@@ -7,9 +7,9 @@ namespace garlic::clove {
         OpenAl
     };
 
-    class AudioDevice;
+    class AhaDevice;
 }
 
 namespace garlic::clove {
-    std::unique_ptr<AudioDevice> createAudioDevice(AudioApi api);
+    std::unique_ptr<AhaDevice> createAudioDevice(AudioApi api);
 }

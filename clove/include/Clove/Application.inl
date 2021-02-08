@@ -11,7 +11,7 @@ namespace garlic::clove {
         return graphicsDevice.get();
     }
 
-    AudioDevice *Application::getAudioDevice() const {
+    AhaDevice *Application::getAudioDevice() const {
         return audioDevice.get();
     }
 

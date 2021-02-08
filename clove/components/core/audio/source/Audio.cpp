@@ -3,7 +3,7 @@
 #include "Clove/Audio/OpenAL/OpenAlDevice.hpp"
 
 namespace garlic::clove {
-    std::unique_ptr<AudioDevice> createAudioDevice(AudioApi api) {
+    std::unique_ptr<AhaDevice> createAudioDevice(AudioApi api) {
         switch(api) {
             case AudioApi::OpenAl:
                 return std::make_unique<OpenAlDevice>();

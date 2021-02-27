@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Clove/Rendering/ShaderBufferTypes.hpp"
-
-#include <Clove/Maths/MathsHelpers.hpp>
 #include <Clove/Maths/Matrix.hpp>
 #include <Clove/Maths/Vector.hpp>
 

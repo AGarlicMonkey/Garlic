@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Clove/Maths/MathsTypes.hpp>
-#include <vector>
 
 namespace garlic::clove {
     /**

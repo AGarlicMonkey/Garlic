@@ -114,4 +114,9 @@ namespace garlic::clove {
 
         return vec<3, T>{ world.x, world.y, world.z };
     }
+
+    template<typename T>
+    vec<3, T> decomposeTranslation(mat<4, 4, T> const &matrix){
+        return { matrix[3] };
+    }
 }

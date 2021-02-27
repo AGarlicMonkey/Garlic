@@ -12,6 +12,7 @@
 
 #include <Clove/ECS/EntityManager.hpp>
 #include <Clove/Maths/Maths.hpp>
+#include <Clove/Maths/MathsHelpers.hpp>
 
 namespace garlic::clove {
     RenderLayer::RenderLayer(ForwardRenderer3D *renderer, EntityManager *entityManager)
@@ -33,7 +34,7 @@ namespace garlic::clove {
 
         //Transform and submit cameras
         entityManager->forEach([this, &activeCamera](Entity entity, TransformComponent const &transform, CameraComponent &camera) {
-            vec3f const position{ transform.position };
+            vec3f const position{ decomposeTranslation(transform.worldMatrix) };
 
             vec3f const camFront{ transform.getForward() };
             vec3f const camUp{ transform.getUp() };

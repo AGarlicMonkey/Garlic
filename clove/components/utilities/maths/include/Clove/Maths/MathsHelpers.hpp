@@ -57,6 +57,9 @@ namespace garlic::clove {
      */
     template<typename T>
     vec<3, T> screenToWorld(vec<2, T> const &screenPos, T distance, vec<2, T> const &screenSize, vec<3, T> const &forward, mat<4, 4, T> const &viewMatrix, mat<4, 4, T> const &projectionMatrix);
+
+    template<typename T>
+    vec<3, T> decomposeTranslation(mat<4, 4, T> const &matrix);
 }
 
 #include "MathsHelpers.inl"

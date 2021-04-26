@@ -26,10 +26,24 @@ namespace garlic::membrane {
     clove::InputResponse EditorLayer::onInputEvent(clove::InputEvent const &inputEvent) {
         if(inputEvent.eventType == clove::InputEvent::Type::Mouse) {
             auto event{ std::get<clove::Mouse::Event>(inputEvent.event) };
-            if(event.getButton() == clove::MouseButton::Right && event.getType() == clove::Mouse::Event::Type::Pressed) {
-                //Make sure prev pos gets updated when the event happens.
-                //This fixes situations where the mouse will be up, move and then go down
-                prevMousePos = event.getPos();
+
+            if(event.getButton() == clove::MouseButton::Right) {
+                if(event.getType() == clove::Mouse::Event::Type::Pressed) {
+                    //Make sure prev + pos gets updated when the event happens.
+                    //This fixes situations where the mouse will be up, move and then go down
+                    mousePos     = event.getPos();
+                    prevMousePos = event.getPos();
+
+                    moveMouse    = true;
+                    return clove::InputResponse::Consumed;
+                } else {
+                    moveMouse = false;
+                    return clove::InputResponse::Consumed;
+                }
+            }
+
+            if(event.getType() == clove::Mouse::Event::Type::Move && moveMouse) {
+                mousePos = event.getPos();
                 return clove::InputResponse::Consumed;
             }
         }
@@ -65,9 +79,8 @@ namespace garlic::membrane {
         }
 
         //Camera Movement: Mouse
-        if(mouse.isButtonPressed(clove::MouseButton::Right)) {
+        if(moveMouse) {
             float constexpr speed = 10.0f;
-            clove::vec2i const mousePos{ mouse.getPosition() };
             clove::vec2i const delta{ mousePos - prevMousePos };
 
             mouseLookYaw += static_cast<float>(delta.x) * speed * deltaTime;

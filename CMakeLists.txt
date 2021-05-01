@@ -41,6 +41,5 @@ add_subdirectory(clove)
 
 #Editor
 if(${GAR_BUILD_BULB} AND ${MSVC})
-	add_subdirectory(membrane)
 	add_subdirectory(bulb)
 endif()

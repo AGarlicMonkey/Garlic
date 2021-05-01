@@ -9,7 +9,6 @@ The Garlic game engine is comprised of the following components:
 |Component|Language|Description|
 |-|-|-|
 |Clove|C++|Clove is the engine itself. This is where all the platform / graphics / rendering / systems etc. are|
-|Membrane|C++/CLR|Membrane is a translation layer inbetween Clove and Bulb|
 |Bulb|C#|Bulb is the editor. It contains all of the view logic|
 
 Note: Bulb is only currently supported on Windows.

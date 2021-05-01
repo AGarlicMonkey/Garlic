@@ -38,7 +38,7 @@ target_link_libraries(
 
 	PUBLIC
 		BulbUI
-        Membrane   
+        BulbMembrane   
 )
 
 #Cs properties

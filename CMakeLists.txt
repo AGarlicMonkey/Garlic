@@ -7,6 +7,8 @@ project(Garlic LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_DOTNET_TARGET_FRAMEWORK_VERSION "v4.7.2")
+
 #Garlic settings
 option(GAR_BUILD_BULB "Build Bulb, Garlic's editor" ON)
 option(GAR_BUILD_TESTS "Build Garlic's tests" OFF)
@@ -38,7 +40,7 @@ endif()
 add_subdirectory(clove)
 
 #Editor
-if(GAR_BUILD_BULB AND MSVC)
+if(${GAR_BUILD_BULB} AND ${MSVC})
 	add_subdirectory(membrane)
 	add_subdirectory(bulb)
 endif()

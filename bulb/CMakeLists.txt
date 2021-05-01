@@ -62,6 +62,5 @@ set_source_files_properties(${SOURCE}/EditorApp.xaml PROPERTIES VS_XAML_TYPE "Ap
 
 #Target properties
 set_target_properties(Bulb PROPERTIES
-		DOTNET_TARGET_FRAMEWORK_VERISON "v4.8"
         VS_DOTNET_REFERENCES "Microsoft.CSharp;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Xaml;System.Xml;WindowsBase"
 )

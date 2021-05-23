@@ -10,11 +10,23 @@
 		MouseMove="Window_MouseMove">
 	<DockPanel>
 		<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-			<Button Content="Load" Command="{Binding LoadSceneCommand}"/>
-			<Button Content="Save" Command="{Binding SaveSceneCommand}"/>
-			<Button Content="Play" Command="{Binding PlayCommand}" IsEnabled="{Binding IsPlayButtonEnabled}"/>
-			<Button Content="Stop" Command="{Binding StopCommand}" IsEnabled="{Binding IsStopButtonEnabled}"/>
+			<Menu>
+				<MenuItem Header="File">
+					<MenuItem Header="Load" Command="{Binding LoadSceneCommand}"/>
+					<MenuItem Header="Save" Command="{Binding SaveSceneCommand}"/>
+				</MenuItem>
+			</Menu>
 		</StackPanel>
+
+		<Separator DockPanel.Dock="Top"/>
+
+		<StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">
+			<Button FontSize="20" Content="Play" Command="{Binding PlayCommand}" IsEnabled="{Binding IsPlayButtonEnabled}"/>
+			<Button FontSize="20" Content="Stop" Command="{Binding StopCommand}" IsEnabled="{Binding IsStopButtonEnabled}"/>
+		</StackPanel>
+
+		<Separator DockPanel.Dock="Top"/>
+
 		<Grid DockPanel.Dock="Bottom">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
@@ -53,6 +65,7 @@
 							Focusable="True" IsTabStop="True"
 							KeyUp="EditorViewport_Key" KeyDown="EditorViewport_Key"
 							MouseUp="EditorViewport_MouseButton" MouseDown="EditorViewport_MouseButton"/>
+			
 			<ScrollViewer Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" BorderThickness="0" VerticalScrollBarVisibility="Auto">
 				<TextBlock x:Name="Log" Text="{Binding Log.LogText}" Background="#FF1F1F1F" Foreground="#FFD8D8D8"/>
 			</ScrollViewer>
@@ -114,6 +127,7 @@
 						</DataTemplate>
 					</ListBox.Resources>
 				</ListBox>
+				
 				<Menu HorizontalAlignment="Center">
 					<MenuItem Header="Add Component" ItemsSource="{Binding Scene.ComponentMenuItems}">
 						<!--Doing a regular DataTemplate here will cause a MenuItem within a MenuItem. So manually set up the container style ourselves-->

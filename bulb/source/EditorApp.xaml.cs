@@ -19,16 +19,10 @@ namespace Garlic.Bulb {
 
         private Membrane.Application engineApp;
 
-        //TODO: Move to MainWindow
-        private WriteableBitmap imageSource;
-        private IntPtr backBuffer;
-
         private Thread engineThread;
         private bool exitThread = false;
 
         private Size size = new Size(1, 1);
-        private bool sizeChanged = false;
-        private object resizeLock = new object();
 
         private void EditorStartup(object sender, StartupEventArgs e) {
             sessionViewModel = new EditorSessionViewModel();
@@ -39,13 +33,10 @@ namespace Garlic.Bulb {
             editorWindow = new MainWindow();
 
             editorWindow.DataContext = sessionViewModel;
-            editorWindow.RenderArea.SizeChanged += OnRenderAreaSizeChanged;
             editorWindow.Closing += StopEngine;
 
             editorWindow.Show();
             MainWindow = editorWindow;
-
-            CreateImageSource(size);
 
             //Initialise the engine
             engineApp = new Membrane.Application((int)size.Width, (int)size.Height);
@@ -55,23 +46,9 @@ namespace Garlic.Bulb {
             engineThread.Start();
         }
 
-        private void OnRenderAreaSizeChanged(object sender, SizeChangedEventArgs e) {
-            lock (resizeLock) {
-                size = e.NewSize;
-                CreateImageSource(size);
-                sizeChanged = true;
-            }
-        }
-
         private void StopEngine(object sender, CancelEventArgs e) {
             exitThread = true;
             engineThread.Join();
-        }
-
-        private void CreateImageSource(Size size) {
-            imageSource = new WriteableBitmap((int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32, null);
-            backBuffer = imageSource.BackBuffer;
-            editorWindow.RenderArea.Source = imageSource;
         }
 
         private void RunEngineApplication() {
@@ -84,20 +61,12 @@ namespace Garlic.Bulb {
                     engineApp.tick();
 
                     //Render to image
-                    lock (resizeLock) {
-                        if (sizeChanged) {
-                            engineApp.resize((int)size.Width, (int)size.Height);
-                            sizeChanged = false;
-                        }
-                        engineApp.render(backBuffer);
-                    }
+                    if (size != editorWindow.EditorViewport.Size) {
+                        size = editorWindow.EditorViewport.Size;
 
-                    //Update the image source through the dispatcher on the thread that owns the image
-                    Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)(() => {
-                        imageSource.Lock();
-                        imageSource.AddDirtyRect(new Int32Rect(0, 0, (int)imageSource.Width, (int)imageSource.Height));
-                        imageSource.Unlock();
-                    }));
+                        engineApp.resize((int)size.Width, (int)size.Height);
+                    }
+                    editorWindow.EditorViewport.WriteToBackBuffer(engineApp.render);
 
                     //Send any engine events to the editor
                     Membrane.MessageHandler.flushEngine(Application.Current.Dispatcher);

@@ -49,13 +49,10 @@
 				</ItemsControl>
 			</StackPanel>
 
-			<!--TODO: Make this user control it's own xaml file-->
-			<UserControl x:Name="EditorViewport" Grid.Column="1"
-					 Focusable="True" IsTabStop="True"
-					 KeyUp="EditorViewport_Key" KeyDown="EditorViewport_Key"
-					 MouseDown="EditorViewport_MouseButton" MouseUp="EditorViewport_MouseButton">
-				<Image x:Name="RenderArea" Stretch="Fill"/>
-			</UserControl>
+			<local:Viewport x:Name="EditorViewport" Grid.Column="1"
+							Focusable="True" IsTabStop="True"
+							KeyUp="EditorViewport_Key" KeyDown="EditorViewport_Key"
+							MouseUp="EditorViewport_MouseButton" MouseDown="EditorViewport_MouseButton"/>
 			<ScrollViewer Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" BorderThickness="0" VerticalScrollBarVisibility="Auto">
 				<TextBlock x:Name="Log" Text="{Binding Log.LogText}" Background="#FF1F1F1F" Foreground="#FFD8D8D8"/>
 			</ScrollViewer>

@@ -15,22 +15,20 @@ add_executable(
 
 	    ${SOURCE}/AssemblyInfo.cs
         
-	    ${SOURCE}/MainWindow.xaml
-		${SOURCE}/MainWindow.xaml.cs
-
-		${SOURCE}/Vector3Box.xaml
-		${SOURCE}/Vector3Box.xaml.cs
+	    ${SOURCE}/Views/MainWindow.xaml
+		${SOURCE}/Views/MainWindow.xaml.cs
+		${SOURCE}/Views/Vector3Box.xaml
+		${SOURCE}/Views/Vector3Box.xaml.cs
 		
-		${SOURCE}/ComponentMenuItemViewModel.cs
-		${SOURCE}/EditorSessionViewModel.cs
-		${SOURCE}/SceneViewModel.cs
-		${SOURCE}/EntityViewModel.cs
-		${SOURCE}/LogViewModel.cs
-
-		${SOURCE}/ComponentViewModel.cs
-		${SOURCE}/CollisionShapeComponentViewModel.cs
-		${SOURCE}/RigidBodyComponentViewModel.cs
-		${SOURCE}/TransformComponentViewModel.cs
+		${SOURCE}/ViewModels/ComponentMenuItemViewModel.cs
+		${SOURCE}/ViewModels/EditorSessionViewModel.cs
+		${SOURCE}/ViewModels/SceneViewModel.cs
+		${SOURCE}/ViewModels/EntityViewModel.cs
+		${SOURCE}/ViewModels/LogViewModel.cs
+		${SOURCE}/ViewModels/ComponentViewModel.cs
+		${SOURCE}/ViewModels/CollisionShapeComponentViewModel.cs
+		${SOURCE}/ViewModels/RigidBodyComponentViewModel.cs
+		${SOURCE}/ViewModels/TransformComponentViewModel.cs
 )
 
 #Libraries
@@ -48,14 +46,14 @@ csharp_set_designer_cs_properties(
 )
 
 csharp_set_xaml_cs_properties(
-	${SOURCE}/EditorApp.xaml
-    ${SOURCE}/EditorApp.xaml.cs
+	${SOURCE}/Views/EditorApp.xaml
+    ${SOURCE}/Views/EditorApp.xaml.cs
 	
-	${SOURCE}/Vector3Box.xaml
-	${SOURCE}/Vector3Box.xaml.cs
+	${SOURCE}/Views/Vector3Box.xaml
+	${SOURCE}/Views/Vector3Box.xaml.cs
 
-	${SOURCE}/MainWindow.xaml
-    ${SOURCE}/MainWindow.xaml.cs
+	${SOURCE}/Views/MainWindow.xaml
+    ${SOURCE}/Views/MainWindow.xaml.cs
 )
 
 #File properties

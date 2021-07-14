@@ -20,7 +20,7 @@ namespace garlic::clove {
         VkImageViewCreateInfo viewInfo{
             .sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
             .pNext      = nullptr,
-            .flags      = 0,
+            .flags      = 0u,
             .image      = image,
             .viewType   = viewType,
             .format     = format,

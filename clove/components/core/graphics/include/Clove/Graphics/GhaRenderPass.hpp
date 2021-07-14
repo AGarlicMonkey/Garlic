@@ -8,9 +8,6 @@
 #include <vector>
 
 namespace garlic::clove {
-    /** Used to represent the implicit subpass before or after a render pass */
-    inline constexpr uint32_t SUBPASS_EXTERNAL = ~0U;
-
     enum class LoadOperation {
         Load,
         Clear,
@@ -27,54 +24,25 @@ namespace garlic::clove {
      */
     struct AttachmentDescriptor {
         GhaImage::Format format{ GhaImage::Format::Unkown };
-        LoadOperation loadOperation{ LoadOperation::DontCare };
-        StoreOperation storeOperation{ StoreOperation::DontCare };
-        GhaImage::Layout initialLayout{ GhaImage::Layout::Undefined }; /**< What layout the GhaRenderPass will expect the image to be in. */
-        GhaImage::Layout finalLayout{ GhaImage::Layout::Undefined };   /**< What layout the image will be transitioned to at the end of the GhaRenderPass.*/
+
+        LoadOperation loadOperation{ LoadOperation::DontCare };    /**< What to do with the attachment when it is loaded. */
+        StoreOperation storeOperation{ StoreOperation::DontCare }; /**< How to store the attachment. */
+
+        GhaImage::Layout initialLayout{ GhaImage::Layout::Undefined }; /**< What layout the render pass will expect the attachment to be in. */
+        GhaImage::Layout usedLayout{ GhaImage::Layout::Undefined };    /**< What layout the attachment will transition to when used during the subpass. */
+        GhaImage::Layout finalLayout{ GhaImage::Layout::Undefined };   /**< What layout the attachment will be transitioned to at the end of the render pass.*/
     };
 
     /**
-     * @brief Allows an attachment to be referenced between multiple subpasses.
-     */
-    struct AttachmentReference {
-        uint32_t attachmentIndex{ 0 };                          /**< The index of the attachment in RenderPassDescriptor::attachments this refernces uses. */
-        GhaImage::Layout layout{ GhaImage::Layout::Undefined }; /**< What layout the attachment will transition to when used during the subpass. */
-    };
-
-    /**
-     * @brief Describes which attachments a subpass uses.
-     */
-    struct SubpassDescriptor {
-        std::vector<AttachmentReference> colourAttachments;
-        std::optional<AttachmentReference> depthAttachment;
-    };
-
-    /**
-     * @brief Describes a dependency between two subpasses, allowing a subpass to be executed after another.
-     */
-    struct SubpassDependency {
-        uint32_t sourceSubpass;      /**< Index of the dependency subpass (inside RenderPassDescriptor::subpasses or SUBPASS_EXTERNAL) */
-        uint32_t destinationSubpass; /**< Index of the dependent subpass (inside RenderPassDescriptor::subpasses or SUBPASS_EXTERNAL). Must be higher than sourceSubpass. */
-
-        PipelineStage sourceStage;      /**< The pipeline stage that gets executed before the dependency in sourceSubpass. */
-        PipelineStage destinationStage; /**< The pipeline stage executed after the barrier in destinationSubpass that waits for the results of the sourceStage. */
-
-        AccessFlags currentAccess; /**< How the attachment(s) in the sourceSubpass are currently being accessed. */
-        AccessFlags newAccess;     /**< How the attachment(s) in the destinationSubpass will be accessed. */
-    };
-
-    /**
-     * @brief A GhaRenderPass is a collection of attachments, subpasses and their dependecies.
-     * @details A GhaRenderPass only describes the attachments used in the pipeline. The actual
-     * array of attachments are in a GhaFramebuffer.
+     * @brief A GhaRenderPass describes a set of attachments that a GhaGraphicsPipelineStateObject can render to.
+     * @details The actual attachments provided to the pipeline are stored in a GhaFramebuffer.
      */
     class GhaRenderPass {
         //TYPES
     public:
         struct Descriptor {
-            std::vector<AttachmentDescriptor> attachments;
-            std::vector<SubpassDescriptor> subpasses;
-            std::vector<SubpassDependency> dependencies;
+            std::vector<AttachmentDescriptor> colourAttachments{};
+            AttachmentDescriptor depthAttachment{};
         };
 
         //FUNCTIONS

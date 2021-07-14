@@ -26,7 +26,6 @@ namespace garlic::clove {
         //Pipeline
         std::vector<VertexAttributeDescriptor> const vertexAttributes{
             VertexAttributeDescriptor{
-                .location = 0,
                 .format   = VertexAttributeFormat::R32G32B32_SFLOAT,
                 .offset   = offsetof(Vertex, position),
             },

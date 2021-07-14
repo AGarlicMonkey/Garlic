@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Clove/Graphics/CommandBuffer.hpp"
-#include "Clove/Graphics/PipelineObject.hpp"
 #include "Clove/Graphics/GhaShader.hpp"
 #include "Clove/Graphics/MemoryBarrier.hpp"
+#include "Clove/Graphics/PipelineObject.hpp"
 
 #include <Clove/Maths/Vector.hpp>
 #include <span>
@@ -49,6 +49,10 @@ namespace garlic::clove {
     public:
         virtual ~GhaGraphicsCommandBuffer() = default;
 
+        /**
+         * @brief Begin recording commands on the buffer. This will implicitly reset the buffer.
+         * @param usageFlag 
+         */
         virtual void beginRecording(CommandBufferUsage usageFlag) = 0;
         virtual void endRecording()                               = 0;
 
@@ -76,14 +80,30 @@ namespace garlic::clove {
          * @param offset Offset into the buffer where the indices begin.
          */
         virtual void bindIndexBuffer(GhaBuffer &indexBuffer, size_t const offset, IndexType indexType) = 0;
-        
-        virtual void bindDescriptorSet(GhaDescriptorSet &descriptorSet, uint32_t const setNum)         = 0;
+
+        /**
+         * @brief Bind a descriptor set. Making all written data available to the pipeline.
+         * @param descriptorSet 
+         * @param setNum Which set to upload the descriptor set into.
+         */
+        virtual void bindDescriptorSet(GhaDescriptorSet &descriptorSet, uint32_t const setNum) = 0;
+        /**
+         * @brief Uploads a small amount of data to the pipeline without the need for descriptor sets.
+         * @details A single block of push constant range is shared across all shader stages. When pushing
+         * multiple values the offsets and sizes will need to line up.
+         * @param stage Which shader stage to upload to.
+         * @param offset The offset into the push constant range to upload to.
+         * @param size The size of the push constant range to update.
+         * @param data The data to upload.
+         */
         virtual void pushConstant(GhaShader::Stage const stage, size_t const offset, size_t const size, void const *data) = 0;
 
         virtual void drawIndexed(size_t const indexCount) = 0;
 
         /**
-         * @brief Creates a memory barrier for a buffer. Allowing for how it's accessed to be changed and/or to transfer queue ownership.
+         * @brief Creates a memory barrier for a buffer. Controlling execution order of commands on the buffer.
+         * @details Any commands done on the buffer before the barrier are guarenteed to happen before commands
+         * executed after the barrier. This barrier can also handle command queue transition.
          * @param buffer The buffer to create the barrier for.
          * @param barrierInfo The information about the barrier.
          * @param sourceStage The pipeline stage that gets executed before the barrier.
@@ -91,7 +111,9 @@ namespace garlic::clove {
          */
         virtual void bufferMemoryBarrier(GhaBuffer &buffer, BufferMemoryBarrierInfo const &barrierInfo, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
         /**
-         * @brief Creates a memory barrier for an image. Allowing for how it's accessed, it's layout and queue ownership to change.
+         * @brief Creates a memory barrier for an image. Controlling execution order of commands on the image.
+         * @details Any commands done on the image before the barrier are guarenteed to happen before commands
+         * executed after the barrier. This barrier can also handle command queue and image layout transition.
          * @param image The image to create the barrier for.
          * @param barrierInfo The information about the barrier.
          * @param sourceStage The pipeline stage that gets executed before the barrier.

@@ -92,12 +92,13 @@ namespace garlic::clove {
             std::shared_ptr<GhaDescriptorSet> lightingDescriptorSet;
             std::shared_ptr<GhaDescriptorSet> uiDescriptorSet;
 
-            std::array<std::shared_ptr<GhaImage>, MAX_LIGHTS> shadowMaps;
-            std::array<std::shared_ptr<GhaImageView>, MAX_LIGHTS> shadowMapViews;
+            std::shared_ptr<GhaImage> shadowMaps;
+            std::shared_ptr<GhaImageView> shadowMapViews;//View over entire array. For sampling in lighting shader.
+            std::array<std::shared_ptr<GhaImageView>, MAX_LIGHTS> shadowMapArrayLayerViews;//Views for each element of the array. For the frame buffer
             std::array<std::shared_ptr<GhaFramebuffer>, MAX_LIGHTS> shadowMapFrameBuffers;
 
-            std::array<std::shared_ptr<GhaImage>, MAX_LIGHTS> cubeShadowMaps;
-            std::array<std::shared_ptr<GhaImageView>, MAX_LIGHTS> cubeShadowMapViews;                                   //Views the whole cube
+            std::shared_ptr<GhaImage> cubeShadowMaps;
+            std::shared_ptr<GhaImageView> cubeShadowMapViews;                                                           //Views the whole cube. For sampling in lighting shader.
             std::array<std::array<std::shared_ptr<GhaImageView>, cubeMapLayerCount>, MAX_LIGHTS> cubeShadowMapFaceViews;//Views each side of the cube. For the frame buffer
             std::array<std::array<std::shared_ptr<GhaFramebuffer>, cubeMapLayerCount>, MAX_LIGHTS> cubeShadowMapFrameBuffers;
         };

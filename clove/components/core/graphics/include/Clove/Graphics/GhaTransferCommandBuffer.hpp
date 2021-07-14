@@ -21,6 +21,10 @@ namespace garlic::clove {
     public:
         virtual ~GhaTransferCommandBuffer() = default;
 
+        /**
+         * @brief Begin recording commands on the buffer. This will implicitly reset the buffer.
+         * @param usageFlag 
+         */
         virtual void beginRecording(CommandBufferUsage usageFlag) = 0;
         virtual void endRecording()                               = 0;
 
@@ -30,7 +34,9 @@ namespace garlic::clove {
         virtual void copyImageToBuffer(GhaImage &source, vec3i const &sourceOffset, vec3ui const &sourceExtent, GhaBuffer &destination, size_t const destinationOffset) = 0;
 
         /**
-         * @brief Creates a memory barrier for a buffer. Allowing for how it's accessed to be changed and/or to transfer queue ownership.
+         * @brief Creates a memory barrier for a buffer. Controlling execution order of commands on the buffer.
+         * @details Any commands done on the buffer before the barrier are guarenteed to happen before commands
+         * executed after the barrier. This barrier can also handle command queue transition.
          * @param buffer The buffer to create the barrier for.
          * @param barrierInfo The information about the barrier.
          * @param sourceStage The pipeline stage that gets executed before the barrier.
@@ -38,7 +44,9 @@ namespace garlic::clove {
          */
         virtual void bufferMemoryBarrier(GhaBuffer &buffer, BufferMemoryBarrierInfo const &barrierInfo, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
         /**
-         * @brief Creates a memory barrier for an image. Allowing for how it's accessed, it's layout and queue ownership to change.
+         * @brief Creates a memory barrier for an image. Controlling execution order of commands on the image.
+         * @details Any commands done on the image before the barrier are guarenteed to happen before commands
+         * executed after the barrier. This barrier can also handle command queue and image layout transition.
          * @param image The image to create the barrier for.
          * @param barrierInfo The information about the barrier.
          * @param sourceStage The pipeline stage that gets executed before the barrier.

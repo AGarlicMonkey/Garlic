@@ -13,32 +13,32 @@ using namespace garlic::clove;
 
 namespace garlic::clove {
     std::unique_ptr<GhaDescriptorSetLayout> createMeshDescriptorSetLayout(GhaFactory &factory) {
-        DescriptorSetBindingInfo const diffuseTextureBinding{
+        DescriptorSetBindingInfo const modelBinding{
             .binding   = 0,
-            .type      = DescriptorType::CombinedImageSampler,
+            .type      = DescriptorType::UniformBuffer,
+            .arraySize = 1,
+            .stage     = GhaShader::Stage::Vertex,
+        };
+
+        DescriptorSetBindingInfo const diffuseTextureBinding{
+            .binding   = 1,
+            .type      = DescriptorType::SampledImage,
             .arraySize = 1,
             .stage     = GhaShader::Stage::Pixel,
         };
 
         DescriptorSetBindingInfo const specularTextureBinding{
-            .binding   = 1,
-            .type      = DescriptorType::CombinedImageSampler,
+            .binding   = 2,
+            .type      = DescriptorType::SampledImage,
             .arraySize = 1,
             .stage     = GhaShader::Stage::Pixel,
         };
 
-        DescriptorSetBindingInfo const modelBinding{
-            .binding   = 2,
-            .type      = DescriptorType::UniformBuffer,
-            .arraySize = 1,
-            .stage     = GhaShader::Stage::Vertex,
-        };
-
-        DescriptorSetBindingInfo const skeletonBinding{
+        DescriptorSetBindingInfo const samplerBinding{
             .binding   = 3,
-            .type      = DescriptorType::UniformBuffer,
+            .type      = DescriptorType::Sampler,
             .arraySize = 1,
-            .stage     = GhaShader::Stage::Vertex,
+            .stage     = GhaShader::Stage::Pixel,
         };
 
         DescriptorSetBindingInfo const colourBinding{
@@ -50,10 +50,10 @@ namespace garlic::clove {
 
         return *factory.createDescriptorSetLayout(GhaDescriptorSetLayout::Descriptor{
             .bindings = {
+                modelBinding,
                 diffuseTextureBinding,
                 specularTextureBinding,
-                modelBinding,
-                skeletonBinding,
+                samplerBinding,
                 colourBinding,
             },
         });
@@ -106,15 +106,22 @@ namespace garlic::clove {
 
         DescriptorSetBindingInfo const directionalShadowMapBinding{
             .binding   = 3,
-            .type      = DescriptorType::CombinedImageSampler,
-            .arraySize = MAX_LIGHTS,
+            .type      = DescriptorType::SampledImage,
+            .arraySize = 1,
             .stage     = GhaShader::Stage::Pixel,
         };
 
         DescriptorSetBindingInfo const pointShadowMapBinding{
             .binding   = 4,
-            .type      = DescriptorType::CombinedImageSampler,
-            .arraySize = MAX_LIGHTS,
+            .type      = DescriptorType::SampledImage,
+            .arraySize = 1,
+            .stage     = GhaShader::Stage::Pixel,
+        };
+
+        DescriptorSetBindingInfo const samplerBinding{
+            .binding   = 5,
+            .type      = DescriptorType::Sampler,
+            .arraySize = 1,
             .stage     = GhaShader::Stage::Pixel,
         };
 
@@ -125,6 +132,7 @@ namespace garlic::clove {
                 directionalShadowTransformBinding,
                 directionalShadowMapBinding,
                 pointShadowMapBinding,
+                samplerBinding,
             },
         });
     }
@@ -132,7 +140,14 @@ namespace garlic::clove {
     std::unique_ptr<GhaDescriptorSetLayout> createUiDescriptorSetLayout(GhaFactory &factory) {
         DescriptorSetBindingInfo const textureBinding{
             .binding   = 0,
-            .type      = DescriptorType::CombinedImageSampler,
+            .type      = DescriptorType::SampledImage,
+            .arraySize = 1,
+            .stage     = GhaShader::Stage::Pixel,
+        };
+
+        DescriptorSetBindingInfo const samplerBinding{
+            .binding   = 1,
+            .type      = DescriptorType::Sampler,
             .arraySize = 1,
             .stage     = GhaShader::Stage::Pixel,
         };
@@ -140,11 +155,12 @@ namespace garlic::clove {
         return *factory.createDescriptorSetLayout(GhaDescriptorSetLayout::Descriptor{
             .bindings = {
                 textureBinding,
+                samplerBinding,
             },
         });
     }
 
-    std::unique_ptr<GhaDescriptorSetLayout> createSkinningDescriptorSetLayout(GhaFactory &factory){
+    std::unique_ptr<GhaDescriptorSetLayout> createSkinningDescriptorSetLayout(GhaFactory &factory) {
         DescriptorSetBindingInfo const skeletonBinding{
             .binding   = 0,
             .type      = DescriptorType::UniformBuffer,

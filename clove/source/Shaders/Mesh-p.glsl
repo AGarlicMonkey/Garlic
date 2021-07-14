@@ -2,11 +2,13 @@
 
 #include "Constants.glsl"
 
-layout(set = 0, binding = 0) uniform sampler2D diffuseSampler;
-layout(set = 0, binding = 1) uniform sampler2D specularSampler;
+layout(set = 0, binding = 1) uniform texture2D diffuseTexture;
+layout(set = 0, binding = 2) uniform texture2D specularTexture;
+layout(set = 0, binding = 3) uniform sampler meshSampler;
 
-layout(set = 2, binding = 3) uniform sampler2D directionalDepthSampler[MAX_LIGHTS];
-layout(set = 2, binding = 4) uniform samplerCube pointLightDepthSampler[MAX_LIGHTS];
+layout(set = 2, binding = 3) uniform texture2DArray directionalDepthTexture;
+layout(set = 2, binding = 4) uniform textureCubeArray pointLightDepthTexture;
+layout(Set = 2, binding = 5) uniform sampler shadowSampler;
 
 layout(set = SET_VIEW, binding = 1) uniform ViewPosition{
 	vec3 viewPos;
@@ -58,8 +60,8 @@ float adjustBias(float minBias, float maxBias, vec3 normal, vec3 lightDir){
 }
 
 void main(){
-	const vec3 diffuseColour = texture(diffuseSampler, fragTexCoord).rgb;
-	const vec3 specularColour = texture(specularSampler, fragTexCoord).rgb;
+	const vec3 diffuseColour = texture(sampler2D(diffuseTexture, meshSampler), fragTexCoord).rgb;
+	const vec3 specularColour = texture(sampler2D(specularTexture, meshSampler), fragTexCoord).rgb;
 
 	vec3 viewDir = normalize(viewPos - fragPos);
 
@@ -97,7 +99,7 @@ void main(){
 		projCoords.xy = projCoords.xy * 0.5f + 0.5f;
 
 		const float currentDepth = projCoords.z;
-		const float closetDepth = texture(directionalDepthSampler[i], projCoords.xy).r;
+		const float closetDepth = texture(sampler2DArray(directionalDepthTexture, shadowSampler), vec3(projCoords.xy, i)).r;
 
 		shadow += currentDepth - adjustBias(minBias, maxBias, normal, lightDir) > closetDepth ? 1.0f : 0.0f;
 	}
@@ -134,7 +136,7 @@ void main(){
 		const vec3 lightToFrag = fragPos - pointLights[i].position;
 
 		const float currentDepth = length(lightToFrag);
-		const float closetDepth = texture(pointLightDepthSampler[i], lightToFrag).r * pointLights[i].farplane;
+		const float closetDepth = texture(samplerCubeArray(pointLightDepthTexture, shadowSampler), vec4(lightToFrag, i)).r * pointLights[i].farplane;
 
 		shadow += currentDepth - adjustBias(minBias, maxBias, normal, lightDir) > closetDepth ? 1.0f : 0.0f;
 	}

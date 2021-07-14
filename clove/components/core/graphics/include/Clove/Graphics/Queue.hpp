@@ -5,9 +5,9 @@
 namespace garlic::clove {
     using QueueFlagsType = uint8_t;
     enum class QueueFlags : QueueFlagsType {
-        None,
-        Transient,   /**< Specifies that command buffers will be freed or reset shortly after using them. */
-        ReuseBuffers /**< Allows buffers to be reset and recorded to multiple times. Normally a buffer needs to be freed and realloacted once used. */
+        None         = 0,
+        Transient    = 1 << 0, /**< Specifies that command buffers will be freed or reset shortly after using them. */
+        ReuseBuffers = 1 << 1  /**< Allows buffers to be reset and recorded to multiple times. Normally a buffer needs to be freed and realloacted once used. */
     };
 
     struct CommandQueueDescriptor {

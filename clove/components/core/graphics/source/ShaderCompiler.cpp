@@ -1,5 +1,7 @@
 #include "Clove/Graphics/ShaderCompiler.hpp"
 
+#include "Clove/Graphics/Metal/MetalGlobals.hpp"
+
 #include <Clove/Definitions.hpp>
 #include <Clove/Log/Log.hpp>
 #include <glslc/file_includer.h>
@@ -98,65 +100,7 @@ namespace garlic::clove::ShaderCompiler {
             return buffer;
         }
 
-        std::vector<uint32_t> spirvToHLSL(std::vector<uint32_t> const &sprivSource) {
-            CLOVE_ASSERT(false, "SPIR-V to HLSL not supported!");
-            return {};
-        }
-
-        std::vector<uint32_t> spirvToMSL(GhaShader::Stage shaderStage, std::vector<uint32_t> const &spirvSource) {
-            spirv_cross::CompilerMSL msl(spirvSource);
-            spirv_cross::CompilerMSL::Options scoptions;
-
-            scoptions.platform = spirv_cross::CompilerMSL::Options::Platform::macOS;
-            msl.set_msl_options(scoptions);
-
-            spirv_cross::ShaderResources resources = msl.get_shader_resources();
-
-            auto const remapMSLBindings = [&msl](uint32_t const binding, spirv_cross::ID const resourceID) {
-                spirv_cross::MSLResourceBinding resourceBinding;
-                resourceBinding.stage    = msl.get_execution_model();
-                resourceBinding.desc_set = msl.get_decoration(resourceID, spv::DecorationDescriptorSet);
-                resourceBinding.binding  = binding;
-                //Can cause issue if not all are set
-                resourceBinding.msl_buffer  = binding;
-                resourceBinding.msl_texture = binding;
-                resourceBinding.msl_sampler = binding;
-                msl.add_msl_resource_binding(resourceBinding);
-            };
-
-            //Set up correct buffer bindings
-            for(auto &resource : resources.uniform_buffers) {
-                uint32_t const binding{ msl.get_decoration(resource.id, spv::DecorationBinding) };
-                remapMSLBindings(binding, resource.id);
-            }
-
-            //Set up correct texture bindings
-            for(auto &resource : resources.separate_images) {
-                uint32_t const binding{ msl.get_decoration(resource.id, spv::DecorationBinding) };
-                remapMSLBindings(binding, resource.id);
-            }
-            for(auto &resource : resources.separate_samplers) {
-                uint32_t const binding{ msl.get_decoration(resource.id, spv::DecorationBinding) };
-                remapMSLBindings(binding, resource.id);
-            }
-
-            //Remap names to semantics
-            if(shaderStage == GhaShader::Stage::Vertex) {
-                for(auto &resource : resources.stage_inputs) {
-                    //uint32_t const location{ msl.get_decoration(resource.id, spv::DecorationLocation) };
-                    std::string str{ msl.get_decoration_string(resource.id, spv::DecorationUserSemantic) };
-
-                    msl.set_name(resource.id, str);
-                }
-            }
-
-            //return msl.compile();
-
-            CLOVE_ASSERT(false, "SPIR-V to HLSL not fully supported!");
-            return {};
-        }
-
-        Expected<std::vector<uint32_t>, std::runtime_error> compile(std::string_view source, std::unique_ptr<shaderc::CompileOptions::IncluderInterface> includer, std::string_view shaderName, GhaShader::Stage shaderStage, ShaderType outputType) {
+        Expected<std::vector<uint32_t>, std::runtime_error> compile(std::string_view source, std::unique_ptr<shaderc::CompileOptions::IncluderInterface> includer, std::string_view shaderName, GhaShader::Stage shaderStage) {
             CLOVE_LOG(LOG_CATEGORY_CLOVE, LogLevel::Trace, "Compiling shader {0}...", shaderName);
 
             shaderc::CompileOptions options{};
@@ -176,22 +120,11 @@ namespace garlic::clove::ShaderCompiler {
             }
 
             CLOVE_LOG(LOG_CATEGORY_CLOVE, LogLevel::Debug, "Successfully compiled shader {0}!", shaderName);
-
-            std::vector<uint32_t> spirvSource{ spirvResult.begin(), spirvResult.end() };
-
-            switch(outputType) {
-                default:
-                case ShaderType::SPIRV:
-                    return spirvSource;
-                case ShaderType::HLSL:
-                    return spirvToHLSL(spirvSource);
-                case ShaderType::MSL:
-                    return spirvToMSL(shaderStage, spirvSource);
-            }
+            return std::vector<uint32_t>{ spirvResult.begin(), spirvResult.end() };
         }
     }
 
-    Expected<std::vector<uint32_t>, std::runtime_error> compileFromFile(std::filesystem::path const &file, GhaShader::Stage shaderStage, ShaderType outputType) {
+    Expected<std::vector<uint32_t>, std::runtime_error> compileFromFile(std::filesystem::path const &file, GhaShader::Stage shaderStage) {
         if(!file.has_filename()) {
             return Unexpected{ std::runtime_error{ "Path does not have a file name" } };
         }
@@ -203,10 +136,49 @@ namespace garlic::clove::ShaderCompiler {
         auto fileIncluder{ std::make_unique<glslc::FileIncluder>(&fileFinder) };
         std::string shaderName{ file.stem().string() };
 
-        return compile({ source.data(), source.size() }, std::move(fileIncluder), shaderName, shaderStage, outputType);
+        return compile({ source.data(), source.size() }, std::move(fileIncluder), shaderName, shaderStage);
     }
 
-    Expected<std::vector<uint32_t>, std::runtime_error> compileFromSource(std::string_view source, std::unordered_map<std::string, std::string> includeSources, std::string_view shaderName, GhaShader::Stage shaderStage, ShaderType outputType) {
-        return compile(source, std::make_unique<EmbeddedSourceIncluder>(std::move(includeSources)), shaderName, shaderStage, outputType);
+    Expected<std::vector<uint32_t>, std::runtime_error> compileFromSource(std::string_view source, std::unordered_map<std::string, std::string> includeSources, std::string_view shaderName, GhaShader::Stage shaderStage) {
+        return compile(source, std::make_unique<EmbeddedSourceIncluder>(std::move(includeSources)), shaderName, shaderStage);
+    }
+
+    Expected<std::string, std::runtime_error> spirvToHLSL(std::span<uint32_t> spirvSource) {
+        return Unexpected{ std::runtime_error{ "SPIR-V to HLSL not supported!" } };
+    }
+
+    Expected<std::string, std::runtime_error> spirvToMSL(std::span<uint32_t> spirvSource) {
+        spirv_cross::CompilerMSL msl{ spirvSource.data(), spirvSource.size() };
+		msl.set_msl_options(spirv_cross::CompilerMSL::Options{
+			.platform                  = spirv_cross::CompilerMSL::Options::Platform::macOS,
+			.msl_version               = spirv_cross::CompilerMSL::Options::make_msl_version(2, 0),
+			.argument_buffers          = true,
+			.enable_decoration_binding = true,
+		});
+
+		spirv_cross::ShaderResources resources{ msl.get_shader_resources() };
+		
+		if(!resources.push_constant_buffers.empty()) {
+			auto const &resource{ resources.push_constant_buffers.front() };
+			spirv_cross::ID const bufferId{ resource.id };
+			spirv_cross::TypeID const bufferTypeId{ resource.base_type_id };
+			spirv_cross::SmallVector<spirv_cross::BufferRange> const bufferRanges{ msl.get_active_buffer_ranges(bufferId) };
+			
+			//Remove the padding added onto push constants when using an offset. The offset is not required in metal
+			//as pushing small chunks of data works much like uploading a buffer.
+			if(!bufferRanges.empty()) {
+				size_t const initialOffset{ msl.get_member_decoration(bufferTypeId, bufferRanges.front().index, spv::Decoration::DecorationOffset) };
+				for(auto const &range : bufferRanges) {
+					//Unset decoration does not seem to work for msl so just manually override the decoration instead.
+					msl.set_member_decoration(bufferTypeId, range.index, spv::Decoration::DecorationOffset, range.offset - initialOffset);
+				}
+			}
+			
+			//Remap the slot the push constant is in to stop overlap with descriptor sets.
+			msl.set_decoration(bufferId, spv::Decoration::DecorationBinding, pushConstantSlot);
+		}
+		
+		
+        return msl.compile();
     }
 }

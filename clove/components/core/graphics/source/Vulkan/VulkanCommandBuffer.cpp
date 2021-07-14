@@ -65,8 +65,8 @@ namespace garlic::clove {
                 .aspectMask     = aspectFlags,
                 .baseMipLevel   = 0,
                 .levelCount     = 1,
-                .baseArrayLayer = 0,
-                .layerCount     = imageDescriptor.type == GhaImage::Type::Cube ? 6u : 1u,
+                .baseArrayLayer = barrierInfo.baseArrayLayer,
+                .layerCount     = barrierInfo.layerCount,
             },
         };
 

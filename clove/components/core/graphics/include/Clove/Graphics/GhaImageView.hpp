@@ -21,7 +21,7 @@ namespace garlic::clove {
         struct Descriptor {
             Type type;
             uint32_t layer{ 0 };      /**< If the image is an array or cube map, which element to start on (0 indexed). */
-            uint32_t layerCount{ 0 }; /**< If the image is an array or cube map, how many elements to view. */
+            uint32_t layerCount{ 1 }; /**< If the image is an array or cube map, how many elements to view. */
         };
 
         //FUNCTIONS

@@ -9,14 +9,22 @@
 
 namespace garlic::clove {
     namespace {
-        VkImageViewType getImageViewType(GhaImageView::Type garlicImageType) {
+        VkImageViewType getImageViewType(GhaImageView::Type garlicImageType, uint32_t layerCount) {
             switch(garlicImageType) {
                 case GhaImageView::Type::_2D:
-                    return VK_IMAGE_VIEW_TYPE_2D;
+                    if(layerCount > 1u) {
+                        return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+                    } else {
+                        return VK_IMAGE_VIEW_TYPE_2D;
+                    }
                 case GhaImageView::Type::_3D:
                     return VK_IMAGE_VIEW_TYPE_3D;
                 case GhaImageView::Type::Cube:
-                    return VK_IMAGE_VIEW_TYPE_CUBE;
+                    if(layerCount > 6u) {
+                        return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+                    } else {
+                        return VK_IMAGE_VIEW_TYPE_CUBE;
+                    }
                 default:
                     CLOVE_ASSERT(false, "{0}: Unhandled image type");
                     return VK_IMAGE_VIEW_TYPE_2D;
@@ -51,13 +59,8 @@ namespace garlic::clove {
     }
 
     std::unique_ptr<GhaImageView> VulkanImage::createView(GhaImageView::Descriptor viewDescriptor) const {
-        {
-            uint32_t const maxLayers{ descriptor.type == Type::Cube ? 6u : 1u };
-            CLOVE_ASSERT(viewDescriptor.layer + viewDescriptor.layerCount <= maxLayers, "{0}: GhaImageView is not compatible!", CLOVE_FUNCTION_NAME_PRETTY);
-        }
-
         VkImageAspectFlags const aspectFlags{ static_cast<VkImageAspectFlags>(descriptor.format == GhaImage::Format::D32_SFLOAT ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT) };
-        return std::make_unique<VulkanImageView>(device.get(), VulkanImageView::create(device.get(), image, getImageViewType(viewDescriptor.type), convertFormat(descriptor.format), aspectFlags, viewDescriptor.layer, viewDescriptor.layerCount));
+        return std::make_unique<VulkanImageView>(device.get(), VulkanImageView::create(device.get(), image, getImageViewType(viewDescriptor.type, viewDescriptor.layerCount), convertFormat(descriptor.format), aspectFlags, viewDescriptor.layer, viewDescriptor.layerCount));
     }
 
     GhaImage::Format VulkanImage::convertFormat(VkFormat vulkanFormat) {

@@ -36,6 +36,6 @@ namespace garlic::clove {
     public:
         virtual ~GhaDescriptorSetLayout() = default;
 
-        virtual const Descriptor& getDescriptor() const = 0;
+        virtual Descriptor const &getDescriptor() const = 0;
     };
 }

@@ -394,7 +394,7 @@ namespace garlic::clove {
     }
 
     Expected<std::unique_ptr<GhaShader>, std::runtime_error> VulkanFactory::createShaderFromFile(std::filesystem::path const &file, GhaShader::Stage shaderStage) {
-        Expected<std::vector<uint32_t>, std::runtime_error> compilationResult{ ShaderCompiler::compileFromFile(file, shaderStage, ShaderType::SPIRV) };
+        Expected<std::vector<uint32_t>, std::runtime_error> compilationResult{ ShaderCompiler::compileFromFile(file, shaderStage) };
         if(compilationResult.hasValue()) {
             std::vector<uint32_t> spirvSource{ std::move(compilationResult.getValue()) };
             return createShaderObject({ spirvSource.begin(), spirvSource.end() });
@@ -404,7 +404,7 @@ namespace garlic::clove {
     }
 
     Expected<std::unique_ptr<GhaShader>, std::runtime_error> VulkanFactory::createShaderFromSource(std::string_view source, std::unordered_map<std::string, std::string> includeSources, std::string_view shaderName, GhaShader::Stage shaderStage) {
-        Expected<std::vector<uint32_t>, std::runtime_error> compilationResult{ ShaderCompiler::compileFromSource(source, std::move(includeSources), shaderName, shaderStage, ShaderType::SPIRV) };
+        Expected<std::vector<uint32_t>, std::runtime_error> compilationResult{ ShaderCompiler::compileFromSource(source, std::move(includeSources), shaderName, shaderStage) };
         if(compilationResult.hasValue()) {
             std::vector<uint32_t> spirvSource{ std::move(compilationResult.getValue()) };
             return createShaderObject({ spirvSource.begin(), spirvSource.end() });
@@ -415,85 +415,78 @@ namespace garlic::clove {
 
     Expected<std::unique_ptr<GhaRenderPass>, std::runtime_error> VulkanFactory::createRenderPass(GhaRenderPass::Descriptor descriptor) {
         //Attachments
-        const size_t attachmentSize = std::size(descriptor.attachments);
-        std::vector<VkAttachmentDescription> attachments(attachmentSize);
-        for(size_t i = 0; i < attachmentSize; ++i) {
+        size_t const colourAttachmentSize{ descriptor.colourAttachments.size() };
+        std::vector<VkAttachmentDescription> attachments(colourAttachmentSize);
+        for(size_t i{ 0 }; i < colourAttachmentSize; ++i) {
             attachments[i] = VkAttachmentDescription{
-                .format         = VulkanImage::convertFormat(descriptor.attachments[i].format),
+                .format         = VulkanImage::convertFormat(descriptor.colourAttachments[i].format),
                 .samples        = VK_SAMPLE_COUNT_1_BIT,
-                .loadOp         = convertLoadOp(descriptor.attachments[i].loadOperation),
-                .storeOp        = convertStoreOp(descriptor.attachments[i].storeOperation),
+                .loadOp         = convertLoadOp(descriptor.colourAttachments[i].loadOperation),
+                .storeOp        = convertStoreOp(descriptor.colourAttachments[i].storeOperation),
                 .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                 .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                .initialLayout  = VulkanImage::convertLayout(descriptor.attachments[i].initialLayout),
-                .finalLayout    = VulkanImage::convertLayout(descriptor.attachments[i].finalLayout),
+                .initialLayout  = VulkanImage::convertLayout(descriptor.colourAttachments[i].initialLayout),
+                .finalLayout    = VulkanImage::convertLayout(descriptor.colourAttachments[i].finalLayout),
             };
         }
+        //Push back the depth attachment so we can reference it in the subpass.
+        attachments.emplace_back(VkAttachmentDescription{
+            .format         = VulkanImage::convertFormat(descriptor.depthAttachment.format),
+            .samples        = VK_SAMPLE_COUNT_1_BIT,
+            .loadOp         = convertLoadOp(descriptor.depthAttachment.loadOperation),
+            .storeOp        = convertStoreOp(descriptor.depthAttachment.storeOperation),
+            .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            .initialLayout  = VulkanImage::convertLayout(descriptor.depthAttachment.initialLayout),
+            .finalLayout    = VulkanImage::convertLayout(descriptor.depthAttachment.finalLayout),
+        });
 
-        //Subpasses
-        const size_t subpassesSize = std::size(descriptor.subpasses);
-        std::vector<VkSubpassDescription> subpasses(subpassesSize);
-
-        //Define the references seperately so they aren't destroyed
-        std::vector<std::vector<VkAttachmentReference>> attachmentReferences(subpassesSize);
-        std::vector<std::optional<VkAttachmentReference>> depthStencilAttachment(subpassesSize);
-
-        for(size_t i = 0; i < subpassesSize; ++i) {
-            //Attachment References: Colour
-            const size_t colourAttachmentSize = std::size(descriptor.subpasses[i].colourAttachments);
-            attachmentReferences[i].resize(colourAttachmentSize);
-            for(size_t j = 0; j < colourAttachmentSize; ++j) {
-                attachmentReferences[i][j] = VkAttachmentReference{
-                    .attachment = descriptor.subpasses[i].colourAttachments[j].attachmentIndex,
-                    .layout     = VulkanImage::convertLayout(descriptor.subpasses[i].colourAttachments[j].layout),
-                };
-            }
-
-            //Attachment References: Depth
-            if(descriptor.subpasses[i].depthAttachment) {
-                depthStencilAttachment[i] = VkAttachmentReference{
-                    .attachment = descriptor.subpasses[i].depthAttachment->attachmentIndex,
-                    .layout     = VulkanImage::convertLayout(descriptor.subpasses[i].depthAttachment->layout),
-                };
-            }
-
-            subpasses[i] = VkSubpassDescription{
-                .flags                   = 0,
-                .pipelineBindPoint       = VK_PIPELINE_BIND_POINT_GRAPHICS,//TODO: Only supporting graphics for now
-                .inputAttachmentCount    = 0,
-                .pInputAttachments       = nullptr,
-                .colorAttachmentCount    = static_cast<uint32_t>(colourAttachmentSize),
-                .pColorAttachments       = std::data(attachmentReferences[i]),
-                .pResolveAttachments     = nullptr,
-                .pDepthStencilAttachment = depthStencilAttachment[i].has_value() ? &depthStencilAttachment[i].value() : nullptr,
-                .preserveAttachmentCount = 0,
-                .pPreserveAttachments    = nullptr,
+        //Build attachment references
+        std::vector<VkAttachmentReference> colourAttachmentReferences(colourAttachmentSize);
+        for(size_t i{ 0 }; i < colourAttachmentSize; ++i) {
+            colourAttachmentReferences[i] = VkAttachmentReference{
+                .attachment = static_cast<uint32_t>(i),
+                .layout     = VulkanImage::convertLayout(descriptor.colourAttachments[i].usedLayout),
             };
         }
+        VkAttachmentReference const depthStencilAttachment{
+            .attachment = static_cast<uint32_t>(attachments.size() - 1),
+            .layout     = VulkanImage::convertLayout(descriptor.depthAttachment.usedLayout),
+        };
 
-        //Dependencies
-        const size_t dependecySize = std::size(descriptor.dependencies);
-        std::vector<VkSubpassDependency> dependecies(dependecySize);
-        for(size_t i = 0; i < dependecySize; ++i) {
-            dependecies[i] = VkSubpassDependency{
-                .srcSubpass    = descriptor.dependencies[i].sourceSubpass == SUBPASS_EXTERNAL ? VK_SUBPASS_EXTERNAL : descriptor.dependencies[i].sourceSubpass,
-                .dstSubpass    = descriptor.dependencies[i].destinationSubpass == SUBPASS_EXTERNAL ? VK_SUBPASS_EXTERNAL : descriptor.dependencies[i].destinationSubpass,
-                .srcStageMask  = convertStage(descriptor.dependencies[i].sourceStage),
-                .dstStageMask  = convertStage(descriptor.dependencies[i].destinationStage),
-                .srcAccessMask = convertAccessFlags(descriptor.dependencies[i].currentAccess),
-                .dstAccessMask = convertAccessFlags(descriptor.dependencies[i].newAccess),
-            };
-        }
+        //Subpass
+        VkSubpassDescription const subpass{
+            .flags                   = 0,
+            .pipelineBindPoint       = VK_PIPELINE_BIND_POINT_GRAPHICS,
+            .inputAttachmentCount    = 0,
+            .pInputAttachments       = nullptr,
+            .colorAttachmentCount    = static_cast<uint32_t>(colourAttachmentSize),
+            .pColorAttachments       = colourAttachmentReferences.data(),
+            .pResolveAttachments     = nullptr,
+            .pDepthStencilAttachment = &depthStencilAttachment,
+            .preserveAttachmentCount = 0,
+            .pPreserveAttachments    = nullptr,
+        };
+
+        //Dependency
+        VkSubpassDependency constexpr dependecy{
+            .srcSubpass    = VK_SUBPASS_EXTERNAL,
+            .dstSubpass    = 0,
+            .srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .srcAccessMask = 0,
+            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        };
 
         //Renderpass
         VkRenderPassCreateInfo const renderPassInfo{
             .sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-            .attachmentCount = static_cast<uint32_t>(attachmentSize),
-            .pAttachments    = std::data(attachments),
-            .subpassCount    = static_cast<uint32_t>(subpassesSize),
-            .pSubpasses      = std::data(subpasses),
-            .dependencyCount = static_cast<uint32_t>(dependecySize),
-            .pDependencies   = std::data(dependecies),
+            .attachmentCount = static_cast<uint32_t>(attachments.size()),
+            .pAttachments    = attachments.data(),
+            .subpassCount    = 1,
+            .pSubpasses      = &subpass,
+            .dependencyCount = 1,
+            .pDependencies   = &dependecy,
         };
 
         VkRenderPass renderPass{ nullptr };
@@ -614,9 +607,9 @@ namespace garlic::clove {
         size_t const vertexAttributeCount{ std::size(descriptor.vertexAttributes) };
         std::vector<VkVertexInputAttributeDescription> vertexAttributes(vertexAttributeCount);
         for(size_t i = 0; i < vertexAttributeCount; ++i) {
-            auto const &attribute = descriptor.vertexAttributes[i];
-            vertexAttributes[i]   = VkVertexInputAttributeDescription{
-                .location = attribute.location,
+            auto const &attribute{ descriptor.vertexAttributes[i] };
+            vertexAttributes[i] = VkVertexInputAttributeDescription{
+                .location = static_cast<uint32_t>(i),
                 .binding  = 0,
                 .format   = convertAttributeFormat(attribute.format),
                 .offset   = attribute.offset,
@@ -989,6 +982,7 @@ namespace garlic::clove {
         std::array const sharedQueueIndices{ *queueFamilyIndices.graphicsFamily, *queueFamilyIndices.transferFamily, *queueFamilyIndices.computeFamily };
         bool const isExclusive{ descriptor.sharingMode == SharingMode::Exclusive };
         bool const isCube{ descriptor.type == GhaImage::Type::Cube };
+        uint32_t const arrayLayers{ isCube ? descriptor.arrayCount * 6u : descriptor.arrayCount };
 
         VkImageCreateInfo const createInfo{
             .sType                 = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -998,7 +992,7 @@ namespace garlic::clove {
             .format                = VulkanImage::convertFormat(descriptor.format),
             .extent                = { descriptor.dimensions.x, descriptor.dimensions.y, 1 },
             .mipLevels             = 1,
-            .arrayLayers           = isCube ? 6u : 1u,
+            .arrayLayers           = arrayLayers,
             .samples               = VK_SAMPLE_COUNT_1_BIT,
             .tiling                = VK_IMAGE_TILING_OPTIMAL,
             .usage                 = getUsageFlags(descriptor.usageFlags),

@@ -42,11 +42,16 @@ namespace garlic::clove {
         /**
          * @brief Maps an image view into a binding inside a shader.
          * @param imageView The image view to map.
-         * @param sampler A sampler describing how the image should be sampled.
          * @param layout The layout of the image being mapped.
          * @param bindingSlot The binding slot inside the shader to map to.
          */
-        virtual void map(GhaImageView const &imageView, GhaSampler const &sampler, GhaImage::Layout const layout, uint32_t const bindingSlot)                       = 0;
-        virtual void map(std::span<std::shared_ptr<GhaImageView>> imageViews, GhaSampler const &sampler, GhaImage::Layout const layout, uint32_t const bindingSlot) = 0;
+        virtual void map(GhaImageView const &imageView, GhaImage::Layout const layout, uint32_t const bindingSlot) = 0;
+
+        /**
+         * @brief Maps a sampler into a binding inside a shader.
+         * @param sampler The sampler to map.
+         * @param bindingSlot The binding slot inside the shader to map to.
+         */
+        virtual void map(GhaSampler const &sampler, uint32_t const bindingSlot) = 0;
     };
 }

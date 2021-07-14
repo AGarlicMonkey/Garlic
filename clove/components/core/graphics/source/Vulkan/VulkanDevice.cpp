@@ -203,7 +203,8 @@ namespace garlic::clove {
             }
 
             bool const requirePresentFamily{ surface != VK_NULL_HANDLE };
-            return indices.isComplete(requirePresentFamily) && extentionsAreSupported && surfaceIsAdequate.value_or(true) && (deviceFeatures.samplerAnisotropy != 0u) && devicePoperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+            bool const hasFeatures{ deviceFeatures.samplerAnisotropy == VK_TRUE && deviceFeatures.imageCubeArray == VK_TRUE };
+            return indices.isComplete(requirePresentFamily) && extentionsAreSupported && surfaceIsAdequate.value_or(true) && hasFeatures && devicePoperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
         }
     }
 
@@ -390,7 +391,8 @@ namespace garlic::clove {
 
             //Sepcify our device features
             VkPhysicalDeviceFeatures deviceFeatures{
-                .samplerAnisotropy = VK_TRUE,//TODO: Maybe we want to expose this to users?
+                .imageCubeArray    = VK_TRUE,
+                .samplerAnisotropy = VK_TRUE,
             };
 
             VkDeviceCreateInfo createInfo {

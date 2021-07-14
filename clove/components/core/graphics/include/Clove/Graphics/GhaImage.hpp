@@ -62,6 +62,7 @@ namespace garlic::clove {
             Type type;
             UsageMode usageFlags;
             vec2ui dimensions;
+            uint32_t arrayCount{ 1u }; /**< How many elements to create for an image array. If the image is of type Cube then this number will be multiplied by 6. */
             Format format;
             SharingMode sharingMode;
         };

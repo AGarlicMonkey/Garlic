@@ -32,6 +32,6 @@ namespace garlic::clove {
         std::unique_ptr<GhaGraphicsCommandBuffer> allocateCommandBuffer() override;
         void freeCommandBuffer(GhaGraphicsCommandBuffer &buffer) override;
 
-        void submit(std::vector<GraphicsSubmitInfo> const &submissions, GhaFence const *signalFence) override;
+        void submit(std::vector<GraphicsSubmitInfo> const &submissions, GhaFence *signalFence) override;
     };
 }

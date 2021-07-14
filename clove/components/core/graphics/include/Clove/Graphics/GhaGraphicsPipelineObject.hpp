@@ -25,7 +25,6 @@ namespace garlic::clove {
     };
 
     struct VertexAttributeDescriptor {
-        uint32_t location{ 0 }; /**< Maps to the location specified in the shader. */
         VertexAttributeFormat format;
         uint32_t offset{ 0 }; /**< Offset into the vertex buffer element of this attribute. */
     };
@@ -63,7 +62,7 @@ namespace garlic::clove {
             std::shared_ptr<GhaShader> pixelShader;
 
             VertexInputBindingDescriptor vertexInput;
-            std::vector<VertexAttributeDescriptor> vertexAttributes;
+            std::vector<VertexAttributeDescriptor> vertexAttributes; /**< The index of each element maps to the layout(location = x) in the vertex shader. */
 
             AreaDescriptor viewportDescriptor;
             AreaDescriptor scissorDescriptor;

@@ -41,7 +41,7 @@ namespace garlic::clove {
     public:
         virtual ~GhaDescriptorPool() = default;
 
-        virtual const Descriptor &getDescriptor() const = 0;
+        virtual Descriptor const &getDescriptor() const = 0;
 
         /** 
          * @brief Allocates a descriptor set for each layout provided.

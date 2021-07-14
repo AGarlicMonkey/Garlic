@@ -52,7 +52,7 @@ namespace garlic::clove {
         vkFreeCommandBuffers(device.get(), commandPool, 1, &vkbuffer);
     }
 
-    void VulkanTransferQueue::submit(std::vector<TransferSubmitInfo> const &submissions, GhaFence const *signalFence) {
+    void VulkanTransferQueue::submit(std::vector<TransferSubmitInfo> const &submissions, GhaFence *signalFence) {
         auto const submissioncount{ std::size(submissions) };
         std::vector<VkSubmitInfo> vkSubmissions;
         vkSubmissions.reserve(submissioncount);

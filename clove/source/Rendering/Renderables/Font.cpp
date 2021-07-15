@@ -118,11 +118,11 @@ namespace garlic::clove {
         };
 
         glyph.character     = createImageWithData(*graphicsFactory, glyphImageDescriptor, faceBuffer, sizeBytes);
-        glyph.characterView = glyph.character->createView(GhaImageView::Descriptor{
-            .type       = GhaImageView::Type::_2D,
-            .layer      = 0,
-            .layerCount = 1,
-        });
+        glyph.characterView = *graphicsFactory->createImageView(*glyph.character, GhaImageView::Descriptor{
+                                                                                     .type       = GhaImageView::Type::_2D,
+                                                                                     .layer      = 0,
+                                                                                     .layerCount = 1,
+                                                                                 });
 
         return glyph;
     }

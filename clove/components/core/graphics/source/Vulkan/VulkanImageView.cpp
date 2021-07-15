@@ -1,11 +1,15 @@
 #include "Clove/Graphics/Vulkan/VulkanImageView.hpp"
 
+#include "Clove/Graphics/GhaImageView.hpp"
+
 #include <Clove/Log/Log.hpp>
 
 namespace garlic::clove {
-    VulkanImageView::VulkanImageView(VkDevice device, VkImageView imageView)
-        : device(device)
-        , imageView(imageView) {
+    VulkanImageView::VulkanImageView(GhaImage::Format viewedFormat, vec2ui viewedDimensions, VkDevice device, VkImageView imageView)
+        : viewedFormat{ viewedFormat }
+        , viewedDimensions{ std::move(viewedDimensions) }
+        , device{ device }
+        , imageView{ imageView } {
     }
 
     VulkanImageView::VulkanImageView(VulkanImageView &&other) noexcept = default;
@@ -16,35 +20,25 @@ namespace garlic::clove {
         vkDestroyImageView(device, imageView, nullptr);
     }
 
-    VkImageView VulkanImageView::create(VkDevice device, VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t const baseLayer, uint32_t const layerCount) {
-        VkImageViewCreateInfo viewInfo{
-            .sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-            .pNext      = nullptr,
-            .flags      = 0,
-            .image      = image,
-            .viewType   = viewType,
-            .format     = format,
-            .components = {
-                .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .a = VK_COMPONENT_SWIZZLE_IDENTITY,
-            },
-            .subresourceRange = {
-                .aspectMask     = aspectFlags,
-                .baseMipLevel   = 0,
-                .levelCount     = 1,
-                .baseArrayLayer = baseLayer,
-                .layerCount     = layerCount,
-            }
-        };
+    GhaImage::Format VulkanImageView::getImageFormat() const {
+        return viewedFormat;
+    }
 
-        VkImageView imageView{ nullptr };
-        if(vkCreateImageView(device, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
-            CLOVE_LOG(LOG_CATEGORY_CLOVE, LogLevel::Error, "Failed to create texture image view");
-            return VK_NULL_HANDLE;
+    vec2ui const &VulkanImageView::getImageDimensions() const {
+        return viewedDimensions;
+    }
+
+    VkImageViewType VulkanImageView::convertType(GhaImageView::Type garlicImageType) {
+        switch(garlicImageType) {
+            case GhaImageView::Type::_2D:
+                return VK_IMAGE_VIEW_TYPE_2D;
+            case GhaImageView::Type::_3D:
+                return VK_IMAGE_VIEW_TYPE_3D;
+            case GhaImageView::Type::Cube:
+                return VK_IMAGE_VIEW_TYPE_CUBE;
+            default:
+                CLOVE_ASSERT(false, "{0}: Unhandled image type");
+                return VK_IMAGE_VIEW_TYPE_2D;
         }
-
-        return imageView;
     }
 }

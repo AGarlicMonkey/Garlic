@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Clove/Graphics/GhaImage.hpp"
-
 #include <Clove/Delegate/MultiCastDelegate.hpp>
 #include <Clove/Expected.hpp>
+#include <Clove/Graphics/GhaImage.hpp>
+#include <Clove/Graphics/GhaImageView.hpp>
 
 namespace garlic::clove {
     class GhaSemaphore;
@@ -56,11 +56,11 @@ namespace garlic::clove {
          * number will be from 0 - N-1 where N is the total number of frames in flight.
          * @param submission The graphics queue submission that uses the imageIndex image.
          */
-        virtual void submit(uint32_t imageIndex, size_t const frameId, garlic::clove::GraphicsSubmitInfo submission) = 0;
+        virtual void submit(uint32_t imageIndex, size_t const frameId, GraphicsSubmitInfo submission) = 0;
 
-        virtual garlic::clove::GhaImage::Format getImageFormat() const = 0;
-        virtual vec2ui getSize() const                                      = 0;
+        virtual GhaImage::Format getImageFormat() const = 0;
+        virtual vec2ui getSize() const                  = 0;
 
-        virtual std::vector<std::shared_ptr<garlic::clove::GhaImageView>> getImageViews() const = 0;
+        virtual std::vector<std::shared_ptr<GhaImageView>> getImageViews() const = 0;
     };
 }

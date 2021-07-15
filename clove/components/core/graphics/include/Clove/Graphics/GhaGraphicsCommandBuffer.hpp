@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Clove/Graphics/CommandBuffer.hpp"
-#include "Clove/Graphics/PipelineObject.hpp"
 #include "Clove/Graphics/GhaShader.hpp"
 #include "Clove/Graphics/MemoryBarrier.hpp"
+#include "Clove/Graphics/PipelineObject.hpp"
 
 #include <Clove/Maths/Vector.hpp>
 #include <span>
@@ -76,8 +76,22 @@ namespace garlic::clove {
          * @param offset Offset into the buffer where the indices begin.
          */
         virtual void bindIndexBuffer(GhaBuffer &indexBuffer, size_t const offset, IndexType indexType) = 0;
-        
-        virtual void bindDescriptorSet(GhaDescriptorSet &descriptorSet, uint32_t const setNum)         = 0;
+
+        /**
+         * @brief Bind a descriptor set. Making all written data available to the pipeline.
+         * @param descriptorSet 
+         * @param setNum Which set to upload the descriptor set into.
+         */
+        virtual void bindDescriptorSet(GhaDescriptorSet &descriptorSet, uint32_t const setNum) = 0;
+        /**
+         * @brief Uploads a small amount of data to the pipeline without the need for descriptor sets.
+         * @details A single block of push constant range is shared across all shader stages. When pushing
+         * multiple values the offsets and sizes will need to line up.
+         * @param stage Which shader stage to upload to.
+         * @param offset The offset into the push constant range to upload to.
+         * @param size The size of the push constant range to update.
+         * @param data The data to upload.
+         */
         virtual void pushConstant(GhaShader::Stage const stage, size_t const offset, size_t const size, void const *data) = 0;
 
         virtual void drawIndexed(size_t const indexCount) = 0;

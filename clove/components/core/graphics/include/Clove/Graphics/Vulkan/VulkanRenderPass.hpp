@@ -9,6 +9,8 @@ namespace garlic::clove {
     class VulkanRenderPass : public GhaRenderPass {
         //VARIABLES
     private:
+        Descriptor descriptor{};
+
         DevicePointer device;
 
         VkRenderPass renderPass{ VK_NULL_HANDLE };
@@ -16,7 +18,7 @@ namespace garlic::clove {
         //FUNCTIONS
     public:
         VulkanRenderPass() = delete;
-        VulkanRenderPass(DevicePointer device, VkRenderPass renderPass);
+        VulkanRenderPass(Descriptor descriptor, DevicePointer device, VkRenderPass renderPass);
 
         VulkanRenderPass(VulkanRenderPass const &other) = delete;
         VulkanRenderPass(VulkanRenderPass &&other) noexcept;
@@ -25,6 +27,8 @@ namespace garlic::clove {
         VulkanRenderPass &operator=(VulkanRenderPass &&other) noexcept;
 
         ~VulkanRenderPass();
+
+        Descriptor const &getDescriptor() const override;
 
         VkRenderPass getRenderPass() const;
     };

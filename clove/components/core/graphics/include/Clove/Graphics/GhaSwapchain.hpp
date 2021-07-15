@@ -35,7 +35,7 @@ namespace garlic::clove {
         virtual std::pair<uint32_t, Result> aquireNextImage(GhaSemaphore const *availableSemaphore) = 0;
 
         virtual GhaImage::Format getImageFormat() const = 0;
-        virtual vec2ui getSize() const                       = 0;
+        virtual vec2ui getSize() const                  = 0;
 
         virtual std::vector<std::shared_ptr<GhaImageView>> getImageViews() const = 0;
     };

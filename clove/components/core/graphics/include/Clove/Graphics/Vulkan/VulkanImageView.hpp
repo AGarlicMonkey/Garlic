@@ -8,26 +8,32 @@ namespace garlic::clove {
     class VulkanImageView : public GhaImageView {
         //VARIABLES
     private:
-        VkDevice device = VK_NULL_HANDLE;
+        GhaImage::Format viewedFormat{};
+        vec2ui viewedDimensions{};
 
-        VkImageView imageView = VK_NULL_HANDLE;
+        VkDevice device{ VK_NULL_HANDLE };
+
+        VkImageView imageView{ VK_NULL_HANDLE };
 
         //FUNCTIONS
     public:
         VulkanImageView() = delete;
-        VulkanImageView(VkDevice device, VkImageView imageView);
+        VulkanImageView(GhaImage::Format viewedFormat, vec2ui viewedDimensions, VkDevice device, VkImageView imageView);
 
-        VulkanImageView(VulkanImageView const& other) = delete;
-        VulkanImageView(VulkanImageView&& other) noexcept;
+        VulkanImageView(VulkanImageView const &other) = delete;
+        VulkanImageView(VulkanImageView &&other) noexcept;
 
-        VulkanImageView& operator=(VulkanImageView const& other) = delete;
-        VulkanImageView& operator=(VulkanImageView&& other) noexcept;
+        VulkanImageView &operator=(VulkanImageView const &other) = delete;
+        VulkanImageView &operator=(VulkanImageView &&other) noexcept;
 
         ~VulkanImageView();
 
+        GhaImage::Format getImageFormat() const override;
+        vec2ui const &getImageDimensions() const override;
+
         inline VkImageView getImageView() const;
 
-        static VkImageView create(VkDevice device, VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t const baseLayer, uint32_t const layerCount);
+        static VkImageViewType convertType(GhaImageView::Type garlicImageType);
     };
 }
 

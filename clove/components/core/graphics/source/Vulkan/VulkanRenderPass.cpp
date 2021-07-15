@@ -7,8 +7,9 @@
 #include <Clove/Log/Log.hpp>
 
 namespace garlic::clove {
-    VulkanRenderPass::VulkanRenderPass(DevicePointer device, VkRenderPass renderPass)
-        : device{ std::move(device) }
+    VulkanRenderPass::VulkanRenderPass(Descriptor descriptor, DevicePointer device, VkRenderPass renderPass)
+        : descriptor{ std::move(descriptor) } 
+        , device{ std::move(device) }
         , renderPass{ renderPass } {
     }
 
@@ -18,6 +19,10 @@ namespace garlic::clove {
 
     VulkanRenderPass::~VulkanRenderPass() {
         vkDestroyRenderPass(device.get(), renderPass, nullptr);
+    }
+
+    VulkanRenderPass::Descriptor const &VulkanRenderPass::getDescriptor() const {
+        return descriptor;
     }
 
     VkRenderPass VulkanRenderPass::getRenderPass() const {

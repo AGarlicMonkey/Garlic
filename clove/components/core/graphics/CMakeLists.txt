@@ -86,6 +86,51 @@ set(
 		${INCLUDE}/Vulkan/VulkanTypes.hpp
 )
 
+#Metal Implementation
+set(
+	MetalFiles
+		${INCLUDE}/Metal/MetalBuffer.hpp
+		${SOURCE}/Metal/MetalBuffer.mm
+		${INCLUDE}/Metal/MetalDescriptorPool.hpp
+		${SOURCE}/Metal/MetalDescriptorPool.mm
+		${INCLUDE}/Metal/MetalDescriptorSet.hpp
+		${INCLUDE}/Metal/MetalDescriptorSet.inl
+		${SOURCE}/Metal/MetalDescriptorSet.mm
+		${INCLUDE}/Metal/MetalDescriptorSetLayout.hpp
+		${SOURCE}/Metal/MetalDescriptorSetLayout.mm
+		${INCLUDE}/Metal/MetalDevice.hpp
+		${SOURCE}/Metal/MetalDevice.mm
+		${INCLUDE}/Metal/MetalFactory.hpp
+		${SOURCE}/Metal/MetalFactory.mm
+		${INCLUDE}/Metal/MetalFramebuffer.hpp
+		${SOURCE}/Metal/MetalFramebuffer.mm
+		${INCLUDE}/Metal/MetalGlobals.hpp
+		${INCLUDE}/Metal/MetalGraphicsCommandBuffer.hpp
+		${SOURCE}/Metal/MetalGraphicsCommandBuffer.mm
+		${INCLUDE}/Metal/MetalGraphicsPipelineObject.hpp
+		${SOURCE}/Metal/MetalGraphicsPipelineObject.mm
+		${INCLUDE}/Metal/MetalGraphicsQueue.hpp
+		${SOURCE}/Metal/MetalGraphicsQueue.mm
+		${INCLUDE}/Metal/MetalImage.hpp
+		${SOURCE}/Metal/MetalImage.mm
+		${INCLUDE}/Metal/MetalImageView.hpp
+		${SOURCE}/Metal/MetalImageView.mm
+		${INCLUDE}/Metal/MetalPresentQueue.hpp
+		${SOURCE}/Metal/MetalPresentQueue.mm
+		${INCLUDE}/Metal/MetalRenderPass.hpp
+		${INCLUDE}/Metal/MetalRenderPass.inl
+		${SOURCE}/Metal/MetalRenderPass.mm
+		${INCLUDE}/Metal/MetalSampler.hpp
+		${INCLUDE}/Metal/MetalSampler.inl
+		${SOURCE}/Metal/MetalSampler.mm
+		${INCLUDE}/Metal/MetalShader.hpp
+		${SOURCE}/Metal/MetalShader.mm
+		${INCLUDE}/Metal/MetalSwapchain.hpp
+		${SOURCE}/Metal/MetalSwapchain.mm
+		${INCLUDE}/Metal/MetalView.hpp
+		${SOURCE}/Metal/MetalView.mm
+)
+
 #Library
 add_library(
 	CloveGraphics STATIC
@@ -127,6 +172,7 @@ add_library(
 		${SOURCE}/ShaderCompiler.cpp
 		
 		${VulkanFiles}
+		${MetalFiles}
 
 		#shaderc files required to use the file includer
 		${CMAKE_CURRENT_SOURCE_DIR}/external/shaderc/glslc/file_includer.h
@@ -183,7 +229,9 @@ target_link_libraries(
 
 #Don't compile files not supported on certain platforms
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	set_source_files_properties(${MetalFiles} PROPERTIES HEADER_FILE_ONLY TRUE)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set_source_files_properties(${VulkanFiles} PROPERTIES HEADER_FILE_ONLY TRUE)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	set_source_files_properties(${MetalFiles} PROPERTIES HEADER_FILE_ONLY TRUE)
 endif()

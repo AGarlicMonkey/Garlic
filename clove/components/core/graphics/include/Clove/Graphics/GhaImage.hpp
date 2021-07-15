@@ -1,15 +1,10 @@
 #pragma once
 
-#include "Clove/Graphics/GhaImageView.hpp"
 #include "Clove/Graphics/Resource.hpp"
 
 #include <Clove/Definitions.hpp>
 #include <Clove/Maths/Vector.hpp>
 #include <memory>
-
-namespace garlic::clove {
-    class GhaImageView;
-}
 
 namespace garlic::clove {
     /**
@@ -71,8 +66,6 @@ namespace garlic::clove {
         virtual ~GhaImage() = default;
 
         virtual Descriptor const &getDescriptor() const = 0;
-
-        virtual std::unique_ptr<GhaImageView> createView(GhaImageView::Descriptor viewDescriptor) const = 0;
     };
 
     CLOVE_ENUM_BIT_FLAG_OPERATORS(GhaImage::UsageMode, GhaImage::UsageModeType)

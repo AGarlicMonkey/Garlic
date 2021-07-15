@@ -8,20 +8,12 @@
 #include <Clove/Cast.hpp>
 
 namespace garlic::clove {
-    VulkanSwapchain::VulkanSwapchain(DevicePointer device, VkSwapchainKHR swapchain, VkFormat swapChainImageFormat, VkExtent2D swapChainExtent)
+    VulkanSwapchain::VulkanSwapchain(DevicePointer device, VkSwapchainKHR swapchain, VkFormat swapChainImageFormat, VkExtent2D swapChainExtent, std::vector<std::shared_ptr<VulkanImageView>> imageViews)
         : device{ std::move(device) }
         , swapchain{ swapchain }
         , swapChainImageFormat{ swapChainImageFormat }
-        , swapChainExtent{ swapChainExtent } {
-        uint32_t imageCount{ 0 };
-        vkGetSwapchainImagesKHR(this->device.get(), swapchain, &imageCount, nullptr);
-        images.resize(imageCount);
-        vkGetSwapchainImagesKHR(this->device.get(), swapchain, &imageCount, images.data());
-
-        imageViews.resize(std::size(images));
-        for(size_t i = 0; i < images.size(); ++i) {
-            imageViews[i] = std::make_shared<VulkanImageView>(this->device.get(), VulkanImageView::create(this->device.get(), images[i], VK_IMAGE_VIEW_TYPE_2D, swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 0, 1));
-        }
+        , swapChainExtent{ swapChainExtent }
+        , imageViews{ std::move(imageViews) } {
     }
 
     VulkanSwapchain::VulkanSwapchain(VulkanSwapchain &&other) noexcept = default;

@@ -17,7 +17,7 @@ namespace garlic::clove {
         uint32_t constexpr bytesPerTexel{ 4 };
         uint32_t constexpr white{ 0xffffffff };
 
-        GhaFactory &factory = *Application::get().getGraphicsDevice()->getGraphicsFactory();
+        GhaFactory &factory{ *Application::get().getGraphicsDevice()->getGraphicsFactory() };
 
         GhaImage::Descriptor constexpr imageDescriptor{
             .type        = GhaImage::Type::_2D,
@@ -28,20 +28,21 @@ namespace garlic::clove {
         };
 
         image     = createImageWithData(factory, imageDescriptor, &white, bytesPerTexel);
-        imageView = image->createView(GhaImageView::Descriptor{
-            .type       = GhaImageView::Type::_2D,
-            .layer      = 0,
-            .layerCount = 1,
-        });
+        imageView = *factory.createImageView(*image, GhaImageView::Descriptor{
+                                                         .type       = GhaImageView::Type::_2D,
+                                                         .layer      = 0,
+                                                         .layerCount = 1,
+                                                     });
     }
 
     Image::Image(std::shared_ptr<GhaImage> graphicsImage)
         : image(std::move(graphicsImage)) {
-        imageView = image->createView(GhaImageView::Descriptor{
-            .type       = GhaImageView::Type::_2D,
-            .layer      = 0,
-            .layerCount = 1,
-        });
+        GhaFactory &factory{ *Application::get().getGraphicsDevice()->getGraphicsFactory() };
+        imageView = *factory.createImageView(*image, GhaImageView::Descriptor{
+                                                         .type       = GhaImageView::Type::_2D,
+                                                         .layer      = 0,
+                                                         .layerCount = 1,
+                                                     });
     }
 
     Image::Image(Image const &other) = default;

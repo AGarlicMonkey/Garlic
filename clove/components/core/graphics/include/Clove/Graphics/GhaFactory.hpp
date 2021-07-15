@@ -14,6 +14,7 @@
 #include "Clove/Graphics/GhaGraphicsPipelineObject.hpp"
 #include "Clove/Graphics/GhaGraphicsQueue.hpp"
 #include "Clove/Graphics/GhaImage.hpp"
+#include "Clove/Graphics/GhaImageView.hpp"
 #include "Clove/Graphics/GhaPresentQueue.hpp"
 #include "Clove/Graphics/GhaSampler.hpp"
 #include "Clove/Graphics/GhaSemaphore.hpp"
@@ -72,7 +73,15 @@ namespace garlic::clove {
         virtual Expected<std::unique_ptr<GhaFence>, std::runtime_error> createFence(GhaFence::Descriptor descriptor) = 0;
 
         virtual Expected<std::unique_ptr<GhaBuffer>, std::runtime_error> createBuffer(GhaBuffer::Descriptor descriptor) = 0;
-        virtual Expected<std::unique_ptr<GhaImage>, std::runtime_error> createImage(GhaImage::Descriptor descriptor)    = 0;
+
+        virtual Expected<std::unique_ptr<GhaImage>, std::runtime_error> createImage(GhaImage::Descriptor descriptor) = 0;
+        /**
+         * @brief Creates a view of a GhaImage that can be used in shaders.
+         * @param image The image to create a view from.
+         * @param descriptor 
+         * @return 
+         */
+        virtual Expected<std::unique_ptr<GhaImageView>, std::runtime_error> createImageView(GhaImage const &image, GhaImageView::Descriptor descriptor) = 0;
 
         virtual Expected<std::unique_ptr<GhaSampler>, std::runtime_error> createSampler(GhaSampler::Descriptor descriptor) = 0;
     };

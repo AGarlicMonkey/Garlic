@@ -9,6 +9,8 @@ namespace garlic::clove {
     class VulkanGraphicsPipelineObject : public GhaGraphicsPipelineObject {
         //VARIABLES
     private:
+        Descriptor descriptor{};
+
         DevicePointer device;
 
         VkPipeline pipeline{ VK_NULL_HANDLE };
@@ -17,7 +19,7 @@ namespace garlic::clove {
         //FUNCTIONS
     public:
         VulkanGraphicsPipelineObject() = delete;
-        VulkanGraphicsPipelineObject(DevicePointer device, VkPipeline pipeline, VkPipelineLayout pipelineLayout);
+        VulkanGraphicsPipelineObject(Descriptor descriptor, DevicePointer device, VkPipeline pipeline, VkPipelineLayout pipelineLayout);
 
         VulkanGraphicsPipelineObject(VulkanGraphicsPipelineObject const &other) = delete;
         VulkanGraphicsPipelineObject(VulkanGraphicsPipelineObject &&other) noexcept;
@@ -26,6 +28,8 @@ namespace garlic::clove {
         VulkanGraphicsPipelineObject &operator=(VulkanGraphicsPipelineObject &&other) noexcept;
 
         ~VulkanGraphicsPipelineObject();
+
+        Descriptor const &getDescriptor() const override;
 
         VkPipeline getPipeline() const;
         VkPipelineLayout getLayout() const;

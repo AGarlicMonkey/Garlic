@@ -2,17 +2,16 @@
 
 #include "Clove/Application.hpp"
 
-#include <Clove/Graphics/GhaFence.hpp>
 #include <Clove/Graphics/GhaBuffer.hpp>
 #include <Clove/Graphics/GhaDevice.hpp>
 #include <Clove/Graphics/GhaFactory.hpp>
+#include <Clove/Graphics/GhaFence.hpp>
 #include <Clove/Graphics/GhaGraphicsQueue.hpp>
 
 namespace garlic::clove {
     GraphicsImageRenderTarget::GraphicsImageRenderTarget(GhaImage::Descriptor imageDescriptor, std::shared_ptr<GhaFactory> factory)
         : imageDescriptor{ imageDescriptor }
         , factory{ std::move(factory) } {
-
         //We won't be allocating any buffers from this queue, only using it to submit
         graphicsQueue = *this->factory->createGraphicsQueue(CommandQueueDescriptor{ .flags = QueueFlags::None });
         transferQueue = *this->factory->createTransferQueue(CommandQueueDescriptor{ .flags = QueueFlags::ReuseBuffers });
@@ -85,11 +84,11 @@ namespace garlic::clove {
         onPropertiesChangedBegin.broadcast();
 
         renderTargetImage = *factory->createImage(imageDescriptor);
-        renderTargetView  = renderTargetImage->createView(GhaImageView::Descriptor{
-            .type       = GhaImageView::Type::_2D,
-            .layer      = 0,
-            .layerCount = 1,
-        });
+        renderTargetView  = *factory->createImageView(*renderTargetImage, GhaImageView::Descriptor{
+                                                                             .type       = GhaImageView::Type::_2D,
+                                                                             .layer      = 0,
+                                                                             .layerCount = 1,
+                                                                         });
 
         size_t constexpr bytesPerPixel{ 4 };//Assuming image format is 4 bbp
         size_t const bufferSize{ imageDescriptor.dimensions.x * imageDescriptor.dimensions.y * bytesPerPixel };

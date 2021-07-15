@@ -14,9 +14,9 @@ namespace garlic::clove {
     Material::Material() {
         using namespace garlic::clove;
 
-        if(defaultImage.use_count() == 0) {
-            GhaFactory &factory = *Application::get().getGraphicsDevice()->getGraphicsFactory();
+        GhaFactory &factory{ *Application::get().getGraphicsDevice()->getGraphicsFactory() };
 
+        if(defaultImage.use_count() == 0) {
             vec2f constexpr imageDimensions{ 1.0f, 1.0f };
             uint32_t constexpr bytesPerTexel{ 4 };
             uint32_t constexpr white{ 0xffffffff };
@@ -46,8 +46,8 @@ namespace garlic::clove {
             .layerCount = 1,
         };
 
-        diffuseView  = diffuseImage->createView(viewDescriptor);
-        specularView = specularImage->createView(viewDescriptor);
+        diffuseView  = *factory.createImageView(*diffuseImage, viewDescriptor);
+        specularView = *factory.createImageView(*specularImage, viewDescriptor);
     }
 
     Material::Material(Material const &other) = default;
@@ -60,21 +60,25 @@ namespace garlic::clove {
 
     Material::~Material() = default;
 
-    void Material::setDiffuseTexture(std::shared_ptr<garlic::clove::GhaImage> image) {
+    void Material::setDiffuseTexture(std::shared_ptr<GhaImage> image) {
+        GhaFactory &factory{ *Application::get().getGraphicsDevice()->getGraphicsFactory() };
+
         diffuseImage = std::move(image);
-        diffuseView  = diffuseImage->createView(garlic::clove::GhaImageView::Descriptor{
-            .type       = garlic::clove::GhaImageView::Type::_2D,
-            .layer      = 0,
-            .layerCount = 1,
-        });
+        diffuseView  = *factory.createImageView(*diffuseImage, GhaImageView::Descriptor{
+                                                                  .type       = GhaImageView::Type::_2D,
+                                                                  .layer      = 0,
+                                                                  .layerCount = 1,
+                                                              });
     }
 
-    void Material::setSpecularTexture(std::shared_ptr<garlic::clove::GhaImage> image) {
+    void Material::setSpecularTexture(std::shared_ptr<GhaImage> image) {
+        GhaFactory &factory{ *Application::get().getGraphicsDevice()->getGraphicsFactory() };
+
         specularImage = std::move(image);
-        specularView  = specularImage->createView(garlic::clove::GhaImageView::Descriptor{
-            .type       = garlic::clove::GhaImageView::Type::_2D,
-            .layer      = 0,
-            .layerCount = 1,
-        });
+        specularView  = *factory.createImageView(*specularImage, GhaImageView::Descriptor{
+                                                                    .type       = GhaImageView::Type::_2D,
+                                                                    .layer      = 0,
+                                                                    .layerCount = 1,
+                                                                });
     }
 }

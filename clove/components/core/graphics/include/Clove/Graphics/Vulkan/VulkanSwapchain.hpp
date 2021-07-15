@@ -20,13 +20,12 @@ namespace garlic::clove {
         VkFormat swapChainImageFormat{};
         VkExtent2D swapChainExtent{};
 
-        std::vector<VkImage> images;
-        std::vector<std::shared_ptr<VulkanImageView>> imageViews;
+        std::vector<std::shared_ptr<VulkanImageView>> imageViews{};
 
         //FUNCTIONS
     public:
         VulkanSwapchain() = delete;
-        VulkanSwapchain(DevicePointer device, VkSwapchainKHR swapchain, VkFormat swapChainImageFormat, VkExtent2D swapChainExtent);
+        VulkanSwapchain(DevicePointer device, VkSwapchainKHR swapchain, VkFormat swapChainImageFormat, VkExtent2D swapChainExtent, std::vector<std::shared_ptr<VulkanImageView>> imageViews);
 
         VulkanSwapchain(VulkanSwapchain const &other) = delete;
         VulkanSwapchain(VulkanSwapchain &&other) noexcept;

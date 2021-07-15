@@ -26,22 +26,18 @@ namespace garlic::clove {
         //Create attributes for animated meshes
         std::vector<VertexAttributeDescriptor> const vertexAttributes{
             VertexAttributeDescriptor{
-                .location = 0,
                 .format   = VertexAttributeFormat::R32G32B32_SFLOAT,
                 .offset   = offsetof(Vertex, position),
             },
             VertexAttributeDescriptor{
-                .location = 1,
                 .format   = VertexAttributeFormat::R32G32B32_SFLOAT,
                 .offset   = offsetof(Vertex, normal),
             },
             VertexAttributeDescriptor{
-                .location = 2,
                 .format   = VertexAttributeFormat::R32G32_SFLOAT,
                 .offset   = offsetof(Vertex, texCoord),
             },
             VertexAttributeDescriptor{
-                .location = 3,
                 .format   = VertexAttributeFormat::R32G32B32_SFLOAT,
                 .offset   = offsetof(Vertex, colour),
             },

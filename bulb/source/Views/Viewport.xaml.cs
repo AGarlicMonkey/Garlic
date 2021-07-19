@@ -9,6 +9,8 @@ namespace Garlic.Bulb {
     public partial class Viewport : UserControl {
         public delegate void RenderDelegate(IntPtr backBuffer);
 
+        public object ResizeMutex { get; } = new object();
+
         public Size Size { get; private set; }
 
         private WriteableBitmap imageSource;
@@ -35,12 +37,14 @@ namespace Garlic.Bulb {
         private void OnSizeChanged(object sender, SizeChangedEventArgs e) => UpdateBackBufferSize(e.NewSize);
 
         private void UpdateBackBufferSize(Size size) {
-            Size = size;
+            lock (ResizeMutex) {
+                Size = size;
 
-            imageSource = new WriteableBitmap((int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32, null);
+                imageSource = new WriteableBitmap((int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32, null);
 
-            Image.Source = imageSource;
-            backBuffer = imageSource.BackBuffer;
+                Image.Source = imageSource;
+                backBuffer = imageSource.BackBuffer;
+            }
         }
     }
 }

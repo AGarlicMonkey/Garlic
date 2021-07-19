@@ -60,16 +60,20 @@ namespace Garlic.Bulb {
                     //Send any editor events to the engine
                     Membrane.MessageHandler.flushEditor();
 
-                    //Update the application
-                    engineApp.tick();
+                    lock (editorWindow.EditorViewport.ResizeMutex) {
+                        //Resize before rendering
+                        if (size != editorWindow.EditorViewport.Size) {
+                            size = editorWindow.EditorViewport.Size;
 
-                    //Render to image
-                    if (size != editorWindow.EditorViewport.Size) {
-                        size = editorWindow.EditorViewport.Size;
+                            engineApp.resize((int)size.Width, (int)size.Height);
+                        }
 
-                        engineApp.resize((int)size.Width, (int)size.Height);
+                        //Update the application
+                        engineApp.tick();
+
+                        //Render to image
+                        editorWindow.EditorViewport.WriteToBackBuffer(engineApp.render);
                     }
-                    editorWindow.EditorViewport.WriteToBackBuffer(engineApp.render);
 
                     //Send any engine events to the editor
                     Membrane.MessageHandler.flushEngine(Current.Dispatcher);

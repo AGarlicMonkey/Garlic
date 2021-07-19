@@ -38,6 +38,12 @@ namespace Garlic.Bulb {
 
         private void UpdateBackBufferSize(Size size) {
             lock (ResizeMutex) {
+                if(size.Width < 1) {
+                    size.Width = 1;
+                }
+                if(size.Height < 1) {
+                    size.Height = 1;
+                }
                 Size = size;
 
                 imageSource = new WriteableBitmap((int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32, null);

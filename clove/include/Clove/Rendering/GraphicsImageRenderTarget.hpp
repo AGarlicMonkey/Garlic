@@ -39,6 +39,8 @@ namespace garlic::clove {
         std::shared_ptr<GhaImageView> renderTargetView;
         std::shared_ptr<GhaBuffer> renderTargetBuffer;
 
+        bool requiresResize{ false };
+
         //FUNCTIONS
     public:
         GraphicsImageRenderTarget() = delete;

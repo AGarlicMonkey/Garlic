@@ -64,12 +64,6 @@ namespace garlic::clove {
         createRenderTargetResources();
 
         //Create semaphores for frame synchronisation
-        for(auto &shadowFinishedSemaphore : shadowFinishedSemaphores) {
-            shadowFinishedSemaphore = *ghaFactory->createSemaphore();
-        }
-        for(auto &cubeShadowFinishedSemaphore : cubeShadowFinishedSemaphores) {
-            cubeShadowFinishedSemaphore = *ghaFactory->createSemaphore();
-        }
         for(auto &skinningFinishedSemaphore : skinningFinishedSemaphores) {
             skinningFinishedSemaphore = *ghaFactory->createSemaphore();
         }
@@ -399,8 +393,7 @@ namespace garlic::clove {
         //Submit the command buffers for the shadow maps.
         GraphicsSubmitInfo cubeShadowSubmitInfo{
             .waitSemaphores   = { { skinningFinishedSemaphores[currentFrame], PipelineStage::VertexShader } },
-            .commandBuffers   = { currentImageData.shadowMapCommandBuffer, currentImageData.cubeShadowMapCommandBuffer },
-            .signalSemaphores = { shadowFinishedSemaphores[currentFrame], cubeShadowFinishedSemaphores[currentFrame] },
+            .commandBuffers   = { currentImageData.shadowMapCommandBuffer, currentImageData.cubeShadowMapCommandBuffer }
         };
         graphicsQueue->submit({ std::move(cubeShadowSubmitInfo) }, nullptr);
 
@@ -481,10 +474,6 @@ namespace garlic::clove {
 
         //Submit the colour output to the render target
         GraphicsSubmitInfo submitInfo{
-            .waitSemaphores = {
-                { shadowFinishedSemaphores[currentFrame], PipelineStage::PixelShader },
-                { cubeShadowFinishedSemaphores[currentFrame], PipelineStage::PixelShader },
-            },
             .commandBuffers = { currentImageData.commandBuffer },
         };
         renderTarget->submit(imageIndex, currentFrame, std::move(submitInfo));

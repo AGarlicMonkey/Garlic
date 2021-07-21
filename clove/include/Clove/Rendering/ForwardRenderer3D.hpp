@@ -150,8 +150,6 @@ namespace garlic::clove {
         std::shared_ptr<GhaRenderPass> shadowMapRenderPass;
 
         //Synchronisation obects
-        std::array<std::shared_ptr<GhaSemaphore>, maxFramesInFlight> shadowFinishedSemaphores;
-        std::array<std::shared_ptr<GhaSemaphore>, maxFramesInFlight> cubeShadowFinishedSemaphores;
         std::array<std::shared_ptr<GhaSemaphore>, maxFramesInFlight> skinningFinishedSemaphores;
 
         //TEMP: Compute skinning objects -- Put inside a GeometryPass

@@ -57,7 +57,7 @@ namespace garlic::clove {
     }
 
     AnimatedModel &AnimatedModel::operator=(AnimatedModel &&other) noexcept {
-        StaticModel::operator=(other);
+        StaticModel::operator=(std::move(other));
         animator             = std::move(other.animator);
         skeleton             = std::move(other.skeleton);
         animClips            = std::move(other.animClips);

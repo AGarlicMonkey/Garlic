@@ -348,12 +348,6 @@ namespace garlic::clove {
         };
         computeQueue->submit({ std::move(skinningSubmitInfo) }, nullptr);
 
-        //As all of the following graphics commands require this skinning pass. Make the queue wait on it before starting any more work
-        GraphicsSubmitInfo waitSubmit{
-            .waitSemaphores = { { skinningFinishedSemaphores[currentFrame], PipelineStage::Top } },
-        };
-        graphicsQueue->submit({ std::move(waitSubmit) }, nullptr);
-
         //DIRECTIONAL LIGHT SHADOWS
         currentImageData.shadowMapCommandBuffer->beginRecording(CommandBufferUsage::OneTimeSubmit);
         for(size_t i = 0; i < MAX_LIGHTS; ++i) {
@@ -375,13 +369,6 @@ namespace garlic::clove {
         }
         currentImageData.shadowMapCommandBuffer->endRecording();
         geometryPasses[GeometryPass::getId<DirectionalLightPass>()]->flushJobs();
-
-        //Submit the command buffer for the directional shadow map
-        GraphicsSubmitInfo shadowSubmitInfo{
-            .commandBuffers   = { currentImageData.shadowMapCommandBuffer },
-            .signalSemaphores = { shadowFinishedSemaphores[currentFrame] },
-        };
-        graphicsQueue->submit({ std::move(shadowSubmitInfo) }, nullptr);
 
         //POINT LIGHT SHADOWS
         currentImageData.cubeShadowMapCommandBuffer->beginRecording(CommandBufferUsage::OneTimeSubmit);
@@ -409,10 +396,11 @@ namespace garlic::clove {
         currentImageData.cubeShadowMapCommandBuffer->endRecording();
         geometryPasses[GeometryPass::getId<PointLightPass>()]->flushJobs();
 
-        //Submit the command buffer for the point shadow map
+        //Submit the command buffers for the shadow maps.
         GraphicsSubmitInfo cubeShadowSubmitInfo{
-            .commandBuffers   = { currentImageData.cubeShadowMapCommandBuffer },
-            .signalSemaphores = { cubeShadowFinishedSemaphores[currentFrame] },
+            .waitSemaphores   = { { skinningFinishedSemaphores[currentFrame], PipelineStage::VertexShader } },
+            .commandBuffers   = { currentImageData.shadowMapCommandBuffer, currentImageData.cubeShadowMapCommandBuffer },
+            .signalSemaphores = { shadowFinishedSemaphores[currentFrame], cubeShadowFinishedSemaphores[currentFrame] },
         };
         graphicsQueue->submit({ std::move(cubeShadowSubmitInfo) }, nullptr);
 
